@@ -84,7 +84,7 @@ func (d *Doc) Parse(r *router.R, path string, level int) {
 		idx := strings.Repeat("  ", level-1) + `- `
 		idx += `[` + r.Title + ` ` + r.Path + `](#` + path + `)`
 		d.Indexes = append(d.Indexes, idx)
-		content := strings.Repeat("#", level)
+		content := "\n" + strings.Repeat("#", level)
 		content += r.Title + ` ` + r.Path
 		d.Contents = append(d.Contents, content)
 		level += 1
@@ -116,20 +116,20 @@ func parseRouterDoc(r *router.R, path string, level int) (idx, content string) {
 	docs = append(docs, title)
 
 	if len(r.RegComments) > 0 {
-		docs = append(docs, `##### 正则参数说明`)
+		docs = append(docs, "\n"+`##### 正则参数说明`)
 		for _, o := range r.RegComments {
 			docs = append(docs, `- `+o.Field+`: `+o.Comment)
 		}
 	}
 
 	if len(r.QueryComments) > 0 {
-		docs = append(docs, `##### Query 参数说明`)
+		docs = append(docs, "\n"+`##### Query 参数说明`)
 		for _, o := range r.QueryComments {
 			docs = append(docs, `- `+o.Field+`: `+o.Comment)
 		}
 	}
 	if r.ReqBody != nil {
-		docs = append(docs, `##### Request Body`)
+		docs = append(docs, "\n"+`##### Request Body`)
 		docs = append(docs, "```json5")
 		docs = append(docs, parseJsonDoc(defaults.Set(r.ReqBody)))
 		docs = append(docs, "```")
@@ -139,7 +139,7 @@ func parseRouterDoc(r *router.R, path string, level int) (idx, content string) {
 
 		res := BaseRes
 		res.Data = defaults.Set(r.ResBody)
-		docs = append(docs, `##### Response Body`)
+		docs = append(docs, "\n"+`##### Response Body`)
 		docs = append(docs, "```json5")
 		docs = append(docs, parseJsonDoc(&res))
 		docs = append(docs, "```")
