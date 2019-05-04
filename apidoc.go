@@ -25,12 +25,14 @@ type Doc struct {
 	Contents []string
 }
 
-func NewDoc() *Doc {
+func NewDoc(r *router.R) *Doc {
 	d := &Doc{
 		Indexes:  make([]string, 0),
 		Contents: make([]string, 0),
 	}
 	d.Indexes = append(d.Indexes, `# Index <a name="index"></a>`)
+
+	d.Parse(r, ``, 1)
 	return d
 }
 
