@@ -45,7 +45,15 @@ func (r *R) Group(path string) *R {
 	return child
 }
 
-func (r *R) Doc(t string, reg, query string, req, res interface{}) {
+func (r *R) GroupDoc(t string) *R {
+	if !r.IsGroup {
+		panic(`GroupDoc need router is group.`)
+	}
+	r.Title = t
+	return r
+}
+
+func (r *R) Doc(t string, reg, query string, req, res interface{}) *R {
 	if (req != nil && reflect.TypeOf(req).Kind() != reflect.Ptr) ||
 		(res != nil && reflect.TypeOf(res).Kind() != reflect.Ptr) {
 		panic(`Doc need pointer`)
@@ -55,7 +63,9 @@ func (r *R) Doc(t string, reg, query string, req, res interface{}) {
 	r.QueryComments = parseFieldCommentPair(query)
 	r.ReqBody = req
 	r.ResBody = res
+	return r
 }
+
 func parseFieldCommentPair(src string) (list []FieldCommentPair) {
 	list = make([]FieldCommentPair, 0)
 	if src == `` {

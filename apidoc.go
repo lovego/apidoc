@@ -45,8 +45,37 @@ func (d *Doc) Create(dir, name string) {
 		log.Panic(err)
 	}
 }
+func merge(r *router.R) {
+	// merge same path group
+	if r == nil || !r.IsGroup {
+		return
+	}
+	path2Node := make(map[string]*router.R)
+	for i := range r.Node {
+		n := r.Node[i]
+		if !n.IsGroup {
+			continue
+		}
+		if path2Node[n.Path] == nil {
+			path2Node[n.Path] = n
+		} else {
+			path2Node[n.Path].Node = append(path2Node[n.Path].Node, n)
+			n = nil
+		}
+		merge(n)
+	}
+
+	nodes := make([]*router.R, 0)
+	for i := range r.Node {
+		if r.Node[i] != nil {
+			nodes = append(nodes, r.Node[i])
+		}
+	}
+	r.Node = nodes
+}
 
 func (d *Doc) Parse(r *router.R, path string, level int) {
+	merge(r)
 	path += r.Path
 	if r.IsGroup && r.Path != `` && level < 3 {
 		idx := strings.Repeat("  ", level-1) + `- `
@@ -99,7 +128,7 @@ func parseRouterDoc(r *router.R, path string, level int) (idx, content string) {
 	if r.ReqBody != nil {
 		docs = append(docs, `##### Request Body`)
 		docs = append(docs, "```json5")
-		docs = append(docs, parseJsonDoc(defaults.Set(r.ResBody)))
+		docs = append(docs, parseJsonDoc(defaults.Set(r.ReqBody)))
 		docs = append(docs, "```")
 	}
 
