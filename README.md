@@ -14,6 +14,19 @@ orders.Routes(r.Group(`/order`))
 ### Router docs
 
 - Prepare request and response body structs
+```
+type Sample struct {
+
+    // tags "c" or "comment" will be parsed for fields comments
+	Name string `c:"name你好"`
+	Age  string `json:"age" comment:"年龄"`
+	
+	// Map Slice Array Pointer will auto set one element for default.
+	Name2Id  map[int]types.Amount
+	List     *types.Basic
+	PtrList  [2]types.Amount
+}
+```
 - Call `r.Doc()`.
 
 ```
