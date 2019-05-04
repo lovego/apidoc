@@ -1,0 +1,16 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Example user template template
+### Example user template
+
+.*.swp
+*.test
+.DS_Store
+tmp
+/xiaomei/xiaomei
+!.gitkeep
+
+# IntelliJ project files
+.idea
+*.iml
+out
+gen
