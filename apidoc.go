@@ -60,7 +60,10 @@ func merge(r *router.R) {
 			path2Node[n.Path] = n
 		} else {
 			path2Node[n.Path].Node = append(path2Node[n.Path].Node, n)
-			n = nil
+			if n.Title != `` {
+				path2Node[n.Path].Title = n.Title
+			}
+			r.Node[i] = nil
 		}
 		merge(n)
 	}
