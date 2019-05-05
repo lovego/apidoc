@@ -81,10 +81,10 @@ func (d *Doc) Parse(r *router.R, path string, level int) {
 	merge(r)
 	path += r.Path
 	if r.IsGroup && r.Path != `` && level < 3 {
-		idx := strings.Repeat("  ", level-1) + `- `
+		idx := strings.Repeat("\t", level-1) + `- `
 		idx += `[` + r.Title + ` ` + r.Path + `](#` + path + `)`
 		d.Indexes = append(d.Indexes, idx)
-		content := "\n" + strings.Repeat("#", level)
+		content := "\n" + strings.Repeat("#", level) + ` `
 		content += r.Title + ` ` + r.Path
 		d.Contents = append(d.Contents, content)
 		level += 1
@@ -145,7 +145,7 @@ func parseRouterDoc(r *router.R, path string, level int) (idx, content string) {
 		docs = append(docs, "```")
 	}
 	docs = append(docs)
-	idx = strings.Repeat(`  `, level-1) + `- `
+	idx = strings.Repeat("\t", level-1) + `- `
 	idx += `[` + r.Title + ` ` + r.Method + ` ` + r.Path + `](#` + name + `)`
 	content = strings.Join(docs, "\n")
 	return

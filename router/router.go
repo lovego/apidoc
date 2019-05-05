@@ -45,7 +45,7 @@ func (r *R) Group(path string) *R {
 	return child
 }
 
-func (r *R) GroupDoc(t string) *R {
+func (r *R) Gdoc(t string) *R {
 	if !r.IsGroup {
 		panic(`GroupDoc need router is group.`)
 	}
