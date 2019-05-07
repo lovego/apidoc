@@ -108,7 +108,7 @@ func parseRouterDoc(r *router.R, path string, level int) (idx, content string) {
 		res := `-`
 		return res
 	})
-	title := `#### ` + r.Method + ` ` + path
+	title := "\n#### " + r.Method + ` ` + path
 	if r.Title != `` {
 		title += ` (` + r.Title + `)`
 	}
