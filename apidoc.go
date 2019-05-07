@@ -25,14 +25,15 @@ type Doc struct {
 	Contents []string
 }
 
-func NewDoc(r *router.R) *Doc {
+func NewDoc(r *router.R, basePath string) *Doc {
 	d := &Doc{
 		Indexes:  make([]string, 0),
 		Contents: make([]string, 0),
 	}
+	d.Indexes = append(d.Indexes, `# Base path: `+basePath)
 	d.Indexes = append(d.Indexes, `# Index <a name="index"></a>`)
 
-	d.Parse(r, ``, 1)
+	d.Parse(r, basePath, 1)
 	return d
 }
 
@@ -59,7 +60,7 @@ func merge(r *router.R) {
 		if path2Node[n.Path] == nil {
 			path2Node[n.Path] = n
 		} else {
-			path2Node[n.Path].Node = append(path2Node[n.Path].Node, n)
+			path2Node[n.Path].Node = append(path2Node[n.Path].Node, n.Node...)
 			if n.Title != `` {
 				path2Node[n.Path].Title = n.Title
 			}
@@ -77,12 +78,12 @@ func merge(r *router.R) {
 	r.Node = nodes
 }
 
-func (d *Doc) Parse(r *router.R, path string, level int) {
+func (d *Doc) Parse(r *router.R, basePath string, level int) {
 	merge(r)
-	path += r.Path
+	basePath += r.Path
 	if r.IsGroup && r.Path != `` && level < 3 {
 		idx := strings.Repeat("\t", level-1) + `- `
-		idx += `[` + r.Title + ` ` + r.Path + `](#` + path + `)`
+		idx += `[` + r.Title + ` ` + r.Path + `](#` + basePath + `)`
 		d.Indexes = append(d.Indexes, idx)
 		content := "\n" + strings.Repeat("#", level) + ` `
 		content += r.Title + ` ` + r.Path
@@ -90,12 +91,12 @@ func (d *Doc) Parse(r *router.R, path string, level int) {
 		level += 1
 	}
 	if len(r.Node) == 0 {
-		idx, c := parseRouterDoc(r, path, level)
+		idx, c := parseRouterDoc(r, basePath, level)
 		d.Indexes = append(d.Indexes, idx)
 		d.Contents = append(d.Contents, c)
 	}
 	for i := range r.Node {
-		d.Parse(r.Node[i], path, level)
+		d.Parse(r.Node[i], basePath, level)
 	}
 }
 
