@@ -1168,11 +1168,12 @@ func typeFields(t reflect.Type) []field {
 					// FOR DOC END
 
 					field := field{
-						name:      name,
-						tag:       tagged,
-						index:     index,
-						typ:       ft,
-						omitEmpty: opts.Contains("omitempty"),
+						name:  name,
+						tag:   tagged,
+						index: index,
+						typ:   ft,
+						//omitEmpty: opts.Contains("omitempty"),
+						omitEmpty: false, // Not concern omitempty tag for doc.
 						quoted:    quoted,
 					}
 					field.nameBytes = []byte(field.name)
