@@ -127,6 +127,20 @@ func (r *R) Put(path string, handlerFunc goa.HandlerFunc) *R {
 	return child
 }
 
+func (r *R) PatchX(path string, handlerFunc goa.HandlerFunc) *R {
+	child := New(r.RouterGroup.PatchX(path, handlerFunc), path)
+	child.Method = `PATCH`
+	r.Node = append(r.Node, child)
+	return child
+}
+
+func (r *R) Patch(path string, handlerFunc goa.HandlerFunc) *R {
+	child := New(r.RouterGroup.Patch(path, handlerFunc), path)
+	child.Method = `PATCH`
+	r.Node = append(r.Node, child)
+	return child
+}
+
 func (r *R) DeleteX(path string, handlerFunc goa.HandlerFunc) *R {
 	child := New(r.RouterGroup.DeleteX(path, handlerFunc), path)
 	child.Method = `DELETE`
