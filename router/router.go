@@ -21,32 +21,38 @@ type R struct {
 	QueryComments []FieldCommentPair
 	ReqBody       interface{}
 	ResBody       interface{}
-	IsGroup       bool
+	IsLeaf        bool // 是否叶子节点
 
 	RouterGroup *goa.RouterGroup
-	Node        []*R
+	Nodes       []*R
 }
 
 func New(r *goa.RouterGroup, path string) *R {
 	return &R{
 		Path:          path,
 		RouterGroup:   r,
-		Node:          make([]*R, 0),
+		Nodes:         make([]*R, 0),
 		RegComments:   make([]FieldCommentPair, 0),
 		QueryComments: make([]FieldCommentPair, 0),
+		//IsGroup: true,
 	}
+}
+
+func NewLeaf(r *goa.RouterGroup, path string) *R {
+	leaf := New(r, path)
+	leaf.IsLeaf = true
+	return leaf
 }
 
 func (r *R) Group(path string) *R {
 	group := r.RouterGroup.Group(path)
 	child := New(group, path)
-	child.IsGroup = true
-	r.Node = append(r.Node, child)
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Gdoc(t string) *R {
-	if !r.IsGroup {
+	if r.IsLeaf {
 		panic(`GroupDoc need router is group.`)
 	}
 	r.Title = t
@@ -86,71 +92,71 @@ func parseFieldCommentPair(src string) (list []FieldCommentPair) {
 }
 
 func (r *R) GetX(path string, handlerFunc goa.HandlerFunc) *R {
-	child := New(r.RouterGroup.GetX(path, handlerFunc), path)
+	child := NewLeaf(r.RouterGroup.GetX(path, handlerFunc), path)
 	child.Method = `GET`
-	r.Node = append(r.Node, child)
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Get(path string, handlerFunc goa.HandlerFunc) *R {
-	child := New(r.RouterGroup.Get(path, handlerFunc), path)
+	child := NewLeaf(r.RouterGroup.Get(path, handlerFunc), path)
 	child.Method = `GET`
-	r.Node = append(r.Node, child)
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) PostX(path string, handlerFunc goa.HandlerFunc) *R {
-	child := New(r.RouterGroup.PostX(path, handlerFunc), path)
+	child := NewLeaf(r.RouterGroup.PostX(path, handlerFunc), path)
 	child.Method = `POST`
-	r.Node = append(r.Node, child)
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Post(path string, handlerFunc goa.HandlerFunc) *R {
-	child := New(r.RouterGroup.Post(path, handlerFunc), path)
+	child := NewLeaf(r.RouterGroup.Post(path, handlerFunc), path)
 	child.Method = `POST`
-	r.Node = append(r.Node, child)
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) PutX(path string, handlerFunc goa.HandlerFunc) *R {
-	child := New(r.RouterGroup.PutX(path, handlerFunc), path)
+	child := NewLeaf(r.RouterGroup.PutX(path, handlerFunc), path)
 	child.Method = `PUT`
-	r.Node = append(r.Node, child)
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Put(path string, handlerFunc goa.HandlerFunc) *R {
-	child := New(r.RouterGroup.Put(path, handlerFunc), path)
+	child := NewLeaf(r.RouterGroup.Put(path, handlerFunc), path)
 	child.Method = `PUT`
-	r.Node = append(r.Node, child)
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) PatchX(path string, handlerFunc goa.HandlerFunc) *R {
-	child := New(r.RouterGroup.PatchX(path, handlerFunc), path)
+	child := NewLeaf(r.RouterGroup.PatchX(path, handlerFunc), path)
 	child.Method = `PATCH`
-	r.Node = append(r.Node, child)
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Patch(path string, handlerFunc goa.HandlerFunc) *R {
-	child := New(r.RouterGroup.Patch(path, handlerFunc), path)
+	child := NewLeaf(r.RouterGroup.Patch(path, handlerFunc), path)
 	child.Method = `PATCH`
-	r.Node = append(r.Node, child)
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) DeleteX(path string, handlerFunc goa.HandlerFunc) *R {
-	child := New(r.RouterGroup.DeleteX(path, handlerFunc), path)
+	child := NewLeaf(r.RouterGroup.DeleteX(path, handlerFunc), path)
 	child.Method = `DELETE`
-	r.Node = append(r.Node, child)
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Delete(path string, handlerFunc goa.HandlerFunc) *R {
-	child := New(r.RouterGroup.Delete(path, handlerFunc), path)
+	child := NewLeaf(r.RouterGroup.Delete(path, handlerFunc), path)
 	child.Method = `DELETE`
-	r.Node = append(r.Node, child)
+	r.Nodes = append(r.Nodes, child)
 	return child
 }

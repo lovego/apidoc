@@ -25,6 +25,10 @@ type Doc struct {
 	Contents []string
 }
 
+func GenDoc(r *router.R, dirPath string) {
+
+}
+
 func NewDoc(r *router.R, basePath string) *Doc {
 	d := &Doc{
 		Indexes:  make([]string, 0),
@@ -48,40 +52,40 @@ func (d *Doc) Create(dir, name string) {
 }
 func merge(r *router.R) {
 	// merge same path group
-	if r == nil || !r.IsGroup {
+	if r == nil || r.IsLeaf {
 		return
 	}
 	path2Node := make(map[string]*router.R)
-	for i := range r.Node {
-		n := r.Node[i]
-		if !n.IsGroup {
+	for i := range r.Nodes {
+		n := r.Nodes[i]
+		if n.IsLeaf {
 			continue
 		}
 		if path2Node[n.Path] == nil {
 			path2Node[n.Path] = n
 		} else {
-			path2Node[n.Path].Node = append(path2Node[n.Path].Node, n.Node...)
+			path2Node[n.Path].Nodes = append(path2Node[n.Path].Nodes, n.Nodes...)
 			if n.Title != `` {
 				path2Node[n.Path].Title = n.Title
 			}
-			r.Node[i] = nil
+			r.Nodes[i] = nil
 		}
 		merge(n)
 	}
 
 	nodes := make([]*router.R, 0)
-	for i := range r.Node {
-		if r.Node[i] != nil {
-			nodes = append(nodes, r.Node[i])
+	for i := range r.Nodes {
+		if r.Nodes[i] != nil {
+			nodes = append(nodes, r.Nodes[i])
 		}
 	}
-	r.Node = nodes
+	r.Nodes = nodes
 }
 
 func (d *Doc) Parse(r *router.R, basePath string, level int) {
 	merge(r)
 	basePath += r.Path
-	if r.IsGroup && r.Path != `` && level < 3 {
+	if !r.IsLeaf && r.Path != `` && level < 3 {
 		idx := strings.Repeat("\t", level-1) + `- `
 		idx += `[` + r.Title + ` ` + r.Path + `](#` + basePath + `)`
 		d.Indexes = append(d.Indexes, idx)
@@ -90,13 +94,13 @@ func (d *Doc) Parse(r *router.R, basePath string, level int) {
 		d.Contents = append(d.Contents, content)
 		level += 1
 	}
-	if len(r.Node) == 0 {
+	if len(r.Nodes) == 0 {
 		idx, c := parseRouterDoc(r, basePath, level)
 		d.Indexes = append(d.Indexes, idx)
 		d.Contents = append(d.Contents, c)
 	}
-	for i := range r.Node {
-		d.Parse(r.Node[i], basePath, level)
+	for i := range r.Nodes {
+		d.Parse(r.Nodes[i], basePath, level)
 	}
 }
 
