@@ -1,8 +1,11 @@
 package apidoc
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
+	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -25,8 +28,36 @@ type Doc struct {
 	Contents []string
 }
 
-func GenDoc(r *router.R, dirPath string) {
+func GenDocs(r *router.R, dirPath string) {
+	l1 := make([]string, 0)
+	for i := range r.Nodes {
+		o := r.Nodes[i]
+		workDir := path.Join(dirPath, o.Path)
+		if err := os.MkdirAll(workDir, 0755); err != nil {
+			log.Panic(err)
+		}
+		l1 = append(l1, fmt.Sprintf(`[%s](%s)`, o.Title, workDir))
 
+		l2 := make([]string, 0)
+		for _, obj := range o.Nodes {
+			NewDoc(obj, o.Path).Create(workDir, obj.Path)
+			l2 = append(l2, fmt.Sprintf(`[%s](%s)`, obj.Title, path.Join(workDir, obj.Path+`.md`)))
+		}
+
+		buf := []byte(strings.Join(l2, "\n"))
+		if err := ioutil.WriteFile(
+			filepath.Join(workDir, "README.md"), buf, 0666,
+		); err != nil {
+			log.Panic(err)
+		}
+	}
+
+	buf := []byte(strings.Join(l1, "\n"))
+	if err := ioutil.WriteFile(
+		filepath.Join(dirPath, "README.md"), buf, 0666,
+	); err != nil {
+		log.Panic(err)
+	}
 }
 
 func NewDoc(r *router.R, basePath string) *Doc {
