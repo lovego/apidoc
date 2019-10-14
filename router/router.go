@@ -58,11 +58,6 @@ func (r *R) Gdoc(t string) *R {
 	return r
 }
 
-func (r *R) T(t string) *R {
-	r.Title = t
-	return r
-}
-
 func (r *R) Doc(t string, reg, query string, req, res interface{}) *R {
 	if (req != nil && reflect.TypeOf(req).Kind() != reflect.Ptr) ||
 		(res != nil && reflect.TypeOf(res).Kind() != reflect.Ptr) {
@@ -73,6 +68,27 @@ func (r *R) Doc(t string, reg, query string, req, res interface{}) *R {
 	r.QueryComments = parseFieldCommentPair(query)
 	r.ReqBody = req
 	r.ResBody = res
+	return r
+}
+
+func (r *R) T(t string) *R {
+	r.Title = t
+	return r
+}
+func (r *R) Reg(str string) *R {
+	r.RegComments = append(r.RegComments, parseFieldCommentPair(str)...)
+	return r
+}
+func (r *R) Query(str string) *R {
+	r.QueryComments = append(r.QueryComments, parseFieldCommentPair(str)...)
+	return r
+}
+func (r *R) Req(obj interface{}) *R {
+	r.ReqBody = obj
+	return r
+}
+func (r *R) Res(obj interface{}) *R {
+	r.ResBody = obj
 	return r
 }
 
