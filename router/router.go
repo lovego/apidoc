@@ -34,7 +34,6 @@ func New(r *goa.RouterGroup, path string) *R {
 		Nodes:         make([]*R, 0),
 		RegComments:   make([]FieldCommentPair, 0),
 		QueryComments: make([]FieldCommentPair, 0),
-		//IsGroup: true,
 	}
 }
 
@@ -55,6 +54,11 @@ func (r *R) Gdoc(t string) *R {
 	if r.IsEntry {
 		panic(`GroupDoc need router is group.`)
 	}
+	r.Title = t
+	return r
+}
+
+func (r *R) T(t string) *R {
 	r.Title = t
 	return r
 }
