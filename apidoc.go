@@ -52,13 +52,13 @@ func (d *Doc) Create(dir, name string) {
 }
 func merge(r *router.R) {
 	// merge same path group
-	if r == nil || r.IsLeaf {
+	if r == nil || r.IsEntry {
 		return
 	}
 	path2Node := make(map[string]*router.R)
 	for i := range r.Nodes {
 		n := r.Nodes[i]
-		if n.IsLeaf {
+		if n.IsEntry {
 			continue
 		}
 		if path2Node[n.Path] == nil {
@@ -85,7 +85,7 @@ func merge(r *router.R) {
 func (d *Doc) Parse(r *router.R, basePath string, level int) {
 	merge(r)
 	basePath += r.Path
-	if !r.IsLeaf && r.Path != `` && level < 3 {
+	if !r.IsEntry && r.Path != `` && level < 3 {
 		idx := strings.Repeat("\t", level-1) + `- `
 		idx += `[` + r.Title + ` ` + r.Path + `](#` + basePath + `)`
 		d.Indexes = append(d.Indexes, idx)

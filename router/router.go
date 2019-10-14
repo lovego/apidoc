@@ -21,7 +21,7 @@ type R struct {
 	QueryComments []FieldCommentPair
 	ReqBody       interface{}
 	ResBody       interface{}
-	IsLeaf        bool // 是否叶子节点
+	IsEntry       bool // 是否 api 接口
 
 	RouterGroup *goa.RouterGroup
 	Nodes       []*R
@@ -38,10 +38,10 @@ func New(r *goa.RouterGroup, path string) *R {
 	}
 }
 
-func NewLeaf(r *goa.RouterGroup, path string) *R {
-	leaf := New(r, path)
-	leaf.IsLeaf = true
-	return leaf
+func NewEntry(r *goa.RouterGroup, path string) *R {
+	entry := New(r, path)
+	entry.IsEntry = true
+	return entry
 }
 
 func (r *R) Group(path string) *R {
@@ -52,7 +52,7 @@ func (r *R) Group(path string) *R {
 }
 
 func (r *R) Gdoc(t string) *R {
-	if r.IsLeaf {
+	if r.IsEntry {
 		panic(`GroupDoc need router is group.`)
 	}
 	r.Title = t
@@ -92,70 +92,70 @@ func parseFieldCommentPair(src string) (list []FieldCommentPair) {
 }
 
 func (r *R) GetX(path string, handlerFunc goa.HandlerFunc) *R {
-	child := NewLeaf(r.RouterGroup.GetX(path, handlerFunc), path)
+	child := NewEntry(r.RouterGroup.GetX(path, handlerFunc), path)
 	child.Method = `GET`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Get(path string, handlerFunc goa.HandlerFunc) *R {
-	child := NewLeaf(r.RouterGroup.Get(path, handlerFunc), path)
+	child := NewEntry(r.RouterGroup.Get(path, handlerFunc), path)
 	child.Method = `GET`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) PostX(path string, handlerFunc goa.HandlerFunc) *R {
-	child := NewLeaf(r.RouterGroup.PostX(path, handlerFunc), path)
+	child := NewEntry(r.RouterGroup.PostX(path, handlerFunc), path)
 	child.Method = `POST`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Post(path string, handlerFunc goa.HandlerFunc) *R {
-	child := NewLeaf(r.RouterGroup.Post(path, handlerFunc), path)
+	child := NewEntry(r.RouterGroup.Post(path, handlerFunc), path)
 	child.Method = `POST`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) PutX(path string, handlerFunc goa.HandlerFunc) *R {
-	child := NewLeaf(r.RouterGroup.PutX(path, handlerFunc), path)
+	child := NewEntry(r.RouterGroup.PutX(path, handlerFunc), path)
 	child.Method = `PUT`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Put(path string, handlerFunc goa.HandlerFunc) *R {
-	child := NewLeaf(r.RouterGroup.Put(path, handlerFunc), path)
+	child := NewEntry(r.RouterGroup.Put(path, handlerFunc), path)
 	child.Method = `PUT`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) PatchX(path string, handlerFunc goa.HandlerFunc) *R {
-	child := NewLeaf(r.RouterGroup.PatchX(path, handlerFunc), path)
+	child := NewEntry(r.RouterGroup.PatchX(path, handlerFunc), path)
 	child.Method = `PATCH`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Patch(path string, handlerFunc goa.HandlerFunc) *R {
-	child := NewLeaf(r.RouterGroup.Patch(path, handlerFunc), path)
+	child := NewEntry(r.RouterGroup.Patch(path, handlerFunc), path)
 	child.Method = `PATCH`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) DeleteX(path string, handlerFunc goa.HandlerFunc) *R {
-	child := NewLeaf(r.RouterGroup.DeleteX(path, handlerFunc), path)
+	child := NewEntry(r.RouterGroup.DeleteX(path, handlerFunc), path)
 	child.Method = `DELETE`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Delete(path string, handlerFunc goa.HandlerFunc) *R {
-	child := NewLeaf(r.RouterGroup.Delete(path, handlerFunc), path)
+	child := NewEntry(r.RouterGroup.Delete(path, handlerFunc), path)
 	child.Method = `DELETE`
 	r.Nodes = append(r.Nodes, child)
 	return child
