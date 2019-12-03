@@ -1,29 +1,29 @@
-package apidoc
+package router
 
 import (
 	"reflect"
 	"strings"
 )
 
-// T set router title.
+// T set router Title.
 func (r *R) T(t string) *R {
-	r.title = t
+	r.Info.Title = t
 	return r
 }
 
 // D set router descriptions.
 func (r *R) D(d string) *R {
-	r.desc = d
+	r.Info.Desc = d
 	return r
 }
 
 func (r *R) ContentType(s string) *R {
-	r.reqContentType = s
+	r.Info.ReqContentType = s
 	return r
 }
 
 func (r *R) AddReqRes(d string) *R {
-	r.desc = d
+	r.Info.Desc = d
 	return r
 }
 
@@ -32,11 +32,11 @@ func (r *R) Doc(t string, reg, query string, req, res interface{}) *R {
 		(res != nil && reflect.TypeOf(res).Kind() != reflect.Ptr) {
 		panic(`Doc need pointer`)
 	}
-	r.title = t
+	r.Info.Title = t
 	//r.RegComments = parseFieldCommentPair(reg)
 	//r.QueryComments = parseFieldCommentPair(query)
-	//r.ReqBody = req
-	//r.ResBody = res
+	//r.ReqBody = Req
+	//r.ResBody = Res
 	return r
 }
 

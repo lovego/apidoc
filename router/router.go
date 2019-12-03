@@ -1,4 +1,4 @@
-package apidoc
+package router
 
 import (
 	"github.com/lovego/goa"
@@ -15,112 +15,118 @@ type errRes struct {
 	Data    interface{} `json:"data"`
 }
 
+type routerInfo struct {
+	Path   string
+	Method string
+
+	Title string
+	Desc  string // 描述
+
+	RegComments    []fieldCommentPair
+	QueryComments  []fieldCommentPair
+	ReqContentType string
+	Req            interface{}
+	Res            interface{}
+	Errors         []errRes
+
+	IsEntry bool // 是否 api 接口
+}
+
 type R struct {
-	path   string
-	method string
-
-	title string
-	desc  string // 描述
-
-	regComments    []fieldCommentPair
-	queryComments  []fieldCommentPair
-	reqContentType string
-	req            interface{}
-	res            interface{}
-	errors         []errRes
-
-	isEntry     bool // 是否 api 接口
+	Info        routerInfo
 	RouterGroup *goa.RouterGroup
-	nodes       []*R
+	Nodes       []*R
 }
 
 func New(r *goa.RouterGroup, path string) *R {
 	return &R{
-		path:        path,
+		Info: routerInfo{
+			Path: path,
+		},
 		RouterGroup: r,
-		nodes:       make([]*R, 0),
+		Nodes:       make([]*R, 0),
 	}
 }
 
 func NewEntry(r *goa.RouterGroup, path string) *R {
 	entry := New(r, path)
-	entry.isEntry = true
+	entry.Info.IsEntry = true
 	return entry
 }
 
 func (r *R) Group(path string) *R {
 	group := r.RouterGroup.Group(path)
 	child := New(group, path)
-	r.nodes = append(r.nodes, child)
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) GetX(path string, handlerFunc goa.HandlerFunc) *R {
 	child := NewEntry(r.RouterGroup.GetX(path, handlerFunc), path)
-	child.method = `GET`
-	r.nodes = append(r.nodes, child)
+	child.Info.Method = `GET`
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Get(path string, handlerFunc goa.HandlerFunc) *R {
 	child := NewEntry(r.RouterGroup.Get(path, handlerFunc), path)
-	child.method = `GET`
-	r.nodes = append(r.nodes, child)
+	child.Info.Method = `GET`
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) PostX(path string, handlerFunc goa.HandlerFunc) *R {
 	child := NewEntry(r.RouterGroup.PostX(path, handlerFunc), path)
-	child.method = `POST`
-	r.nodes = append(r.nodes, child)
+	child.Info.Method = `POST`
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Post(path string, handlerFunc goa.HandlerFunc) *R {
 	child := NewEntry(r.RouterGroup.Post(path, handlerFunc), path)
-	child.method = `POST`
-	r.nodes = append(r.nodes, child)
+	child.Info.Method = `POST`
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) PutX(path string, handlerFunc goa.HandlerFunc) *R {
 	child := NewEntry(r.RouterGroup.PutX(path, handlerFunc), path)
-	child.method = `PUT`
-	r.nodes = append(r.nodes, child)
+	child.Info.Method = `PUT`
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Put(path string, handlerFunc goa.HandlerFunc) *R {
 	child := NewEntry(r.RouterGroup.Put(path, handlerFunc), path)
-	child.method = `PUT`
-	r.nodes = append(r.nodes, child)
+	child.Info.Method = `PUT`
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) PatchX(path string, handlerFunc goa.HandlerFunc) *R {
 	child := NewEntry(r.RouterGroup.PatchX(path, handlerFunc), path)
-	child.method = `PATCH`
-	r.nodes = append(r.nodes, child)
+	child.Info.Method = `PATCH`
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Patch(path string, handlerFunc goa.HandlerFunc) *R {
 	child := NewEntry(r.RouterGroup.Patch(path, handlerFunc), path)
-	child.method = `PATCH`
-	r.nodes = append(r.nodes, child)
+	child.Info.Method = `PATCH`
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) DeleteX(path string, handlerFunc goa.HandlerFunc) *R {
 	child := NewEntry(r.RouterGroup.DeleteX(path, handlerFunc), path)
-	child.method = `DELETE`
-	r.nodes = append(r.nodes, child)
+	child.Info.Method = `DELETE`
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
 func (r *R) Delete(path string, handlerFunc goa.HandlerFunc) *R {
 	child := NewEntry(r.RouterGroup.Delete(path, handlerFunc), path)
-	child.method = `DELETE`
-	r.nodes = append(r.nodes, child)
+	child.Info.Method = `DELETE`
+	r.Nodes = append(r.Nodes, child)
 	return child
 }
