@@ -7,6 +7,7 @@ import (
 
 func Set(ptr interface{}) interface{} {
 	v := reflect.ValueOf(ptr)
+	v.IsNil()
 	if reflect.TypeOf(ptr).Kind() == reflect.Ptr {
 		// panic(`default set need pointer.`)
 		v = reflect.ValueOf(ptr).Elem()

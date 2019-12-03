@@ -12,7 +12,6 @@ import (
 
 	"github.com/lovego/apidoc/defaults"
 	"github.com/lovego/apidoc/json_doc"
-	"github.com/lovego/apidoc/router"
 )
 
 type ResBodyTpl struct {
@@ -28,20 +27,20 @@ type Doc struct {
 	Contents []string
 }
 
-func GenDocs(r *router.R, dirPath string) {
+func GenDocs(r *R, dirPath string) {
 	l1 := make([]string, 0)
-	for i := range r.Nodes {
-		o := r.Nodes[i]
-		workDir := path.Join(dirPath, o.Path)
+	for i := range r.nodes {
+		o := r.nodes[i]
+		workDir := path.Join(dirPath, o.path)
 		if err := os.MkdirAll(workDir, 0755); err != nil {
 			log.Panic(err)
 		}
-		l1 = append(l1, fmt.Sprintf(`[%s](%s)`, o.Title, workDir))
+		l1 = append(l1, fmt.Sprintf(`[%s](%s)`, o.title, workDir))
 
 		l2 := make([]string, 0)
-		for _, obj := range o.Nodes {
-			NewDoc(obj, o.Path).Create(workDir, obj.Path)
-			l2 = append(l2, fmt.Sprintf(`[%s](%s)`, obj.Title, path.Join(workDir, obj.Path+`.md`)))
+		for _, obj := range o.nodes {
+			NewDoc(obj, o.path).Create(workDir, obj.path)
+			l2 = append(l2, fmt.Sprintf(`[%s](%s)`, obj.title, path.Join(workDir, obj.path+`.md`)))
 		}
 
 		buf := []byte(strings.Join(l2, "\n"))
@@ -60,7 +59,7 @@ func GenDocs(r *router.R, dirPath string) {
 	}
 }
 
-func NewDoc(r *router.R, basePath string) *Doc {
+func NewDoc(r *R, basePath string) *Doc {
 	d := &Doc{
 		Indexes:  make([]string, 0),
 		Contents: make([]string, 0),
@@ -81,100 +80,100 @@ func (d *Doc) Create(dir, name string) {
 		log.Panic(err)
 	}
 }
-func merge(r *router.R) {
+func merge(r *R) {
 	// merge same path group
-	if r == nil || r.IsEntry {
+	if r == nil || r.isEntry {
 		return
 	}
-	path2Node := make(map[string]*router.R)
-	for i := range r.Nodes {
-		n := r.Nodes[i]
-		if n.IsEntry {
+	path2Node := make(map[string]*R)
+	for i := range r.nodes {
+		n := r.nodes[i]
+		if n.isEntry {
 			continue
 		}
-		if path2Node[n.Path] == nil {
-			path2Node[n.Path] = n
+		if path2Node[n.path] == nil {
+			path2Node[n.path] = n
 		} else {
-			path2Node[n.Path].Nodes = append(path2Node[n.Path].Nodes, n.Nodes...)
-			if n.Title != `` {
-				path2Node[n.Path].Title = n.Title
+			path2Node[n.path].nodes = append(path2Node[n.path].nodes, n.nodes...)
+			if n.title != `` {
+				path2Node[n.path].title = n.title
 			}
-			r.Nodes[i] = nil
+			r.nodes[i] = nil
 		}
 		merge(n)
 	}
 
-	nodes := make([]*router.R, 0)
-	for i := range r.Nodes {
-		if r.Nodes[i] != nil {
-			nodes = append(nodes, r.Nodes[i])
+	nodes := make([]*R, 0)
+	for i := range r.nodes {
+		if r.nodes[i] != nil {
+			nodes = append(nodes, r.nodes[i])
 		}
 	}
-	r.Nodes = nodes
+	r.nodes = nodes
 }
 
-func (d *Doc) Parse(r *router.R, basePath string, level int) {
+func (d *Doc) Parse(r *R, basePath string, level int) {
 	merge(r)
-	basePath += r.Path
-	if !r.IsEntry && r.Path != `` && level < 3 {
+	basePath += r.path
+	if !r.isEntry && r.path != `` && level < 3 {
 		idx := strings.Repeat("\t", level-1) + `- `
-		idx += `[` + r.Title + ` ` + r.Path + `](#` + basePath + `)`
+		idx += `[` + r.title + ` ` + r.path + `](#` + basePath + `)`
 		d.Indexes = append(d.Indexes, idx)
 		content := "\n" + strings.Repeat("#", level) + ` `
-		content += r.Title + ` ` + r.Path
+		content += r.title + ` ` + r.path
 		d.Contents = append(d.Contents, content)
 		level += 1
 	}
-	if len(r.Nodes) == 0 {
+	if len(r.nodes) == 0 {
 		idx, c := parseRouterDoc(r, basePath, level)
 		d.Indexes = append(d.Indexes, idx)
 		d.Contents = append(d.Contents, c)
 	}
-	for i := range r.Nodes {
-		d.Parse(r.Nodes[i], basePath, level)
+	for i := range r.nodes {
+		d.Parse(r.nodes[i], basePath, level)
 	}
 }
 
 var anchorNameReg = regexp.MustCompile(`[^a-zA-Z0-9]+`)
 
-func parseRouterDoc(r *router.R, path string, level int) (idx, content string) {
+func parseRouterDoc(r *R, path string, level int) (idx, content string) {
 	docs := make([]string, 0)
-	name := r.Method + anchorNameReg.ReplaceAllStringFunc(path, func(s string) string {
+	name := r.method + anchorNameReg.ReplaceAllStringFunc(path, func(s string) string {
 		res := `-`
 		return res
 	})
-	title := "\n#### " + r.Method + ` ` + path
-	if r.Title != `` {
-		title += ` (` + r.Title + `)`
+	title := "\n#### " + r.method + ` ` + path
+	if r.title != `` {
+		title += ` (` + r.title + `)`
 	}
 	title += `<a name="` + name + `"></a>`
 	title += ` [index](#index)`
 	docs = append(docs, title)
 
-	if len(r.RegComments) > 0 {
+	if len(r.regComments) > 0 {
 		docs = append(docs, "\n"+`##### 正则参数说明`)
-		for _, o := range r.RegComments {
+		for _, o := range r.regComments {
 			docs = append(docs, `- `+o.Field+`: `+o.Comment)
 		}
 	}
 
-	if len(r.QueryComments) > 0 {
+	if len(r.queryComments) > 0 {
 		docs = append(docs, "\n"+`##### Query 参数说明`)
-		for _, o := range r.QueryComments {
+		for _, o := range r.queryComments {
 			docs = append(docs, `- `+o.Field+`: `+o.Comment)
 		}
 	}
-	if r.ReqBody != nil {
+	if r.req != nil {
 		docs = append(docs, "\n"+`##### Request Body`)
 		docs = append(docs, "```json5")
-		docs = append(docs, parseJsonDoc(defaults.Set(r.ReqBody)))
+		docs = append(docs, parseJsonDoc(defaults.Set(r.req)))
 		docs = append(docs, "```")
 	}
 
-	if r.ResBody != nil {
+	if r.res != nil {
 
 		res := BaseRes
-		res.Data = defaults.Set(r.ResBody)
+		res.Data = defaults.Set(r.res)
 		docs = append(docs, "\n"+`##### Response Body`)
 		docs = append(docs, "```json5")
 		docs = append(docs, parseJsonDoc(&res))
@@ -182,7 +181,7 @@ func parseRouterDoc(r *router.R, path string, level int) (idx, content string) {
 	}
 	docs = append(docs)
 	idx = strings.Repeat("\t", level-1) + `- `
-	idx += `[` + r.Title + ` ` + r.Method + ` ` + r.Path + `](#` + name + `)`
+	idx += `[` + r.title + ` ` + r.method + ` ` + r.path + `](#` + name + `)`
 	content = strings.Join(docs, "\n")
 	return
 }

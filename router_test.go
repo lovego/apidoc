@@ -1,4 +1,4 @@
-package router
+package apidoc
 
 import (
 	"encoding/json"
