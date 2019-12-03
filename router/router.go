@@ -26,8 +26,8 @@ type routerInfo struct {
 	QueryComments  []fieldCommentPair
 	ReqContentType string
 	Req            interface{}
-	Res            interface{}
-	Errors         []errRes
+	SucRes         interface{}
+	ErrRes         []errRes
 
 	IsEntry bool // 是否 api 接口
 }

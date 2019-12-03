@@ -36,7 +36,7 @@ func (r *R) Doc(t string, reg, query string, req, res interface{}) *R {
 	//r.RegComments = parseFieldCommentPair(reg)
 	//r.QueryComments = parseFieldCommentPair(query)
 	//r.ReqBody = Req
-	//r.ResBody = Res
+	//r.ResBody = SucRes
 	return r
 }
 
