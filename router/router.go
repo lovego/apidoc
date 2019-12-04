@@ -19,15 +19,15 @@ type routerInfo struct {
 	Path   string
 	Method string
 
-	Title string
-	Desc  string // 描述
-
-	RegComments    []fieldCommentPair
-	QueryComments  []fieldCommentPair
+	Title          string
+	Desc           string // 描述
 	ReqContentType string
-	Req            interface{}
-	SucRes         interface{}
-	ErrRes         []errRes
+
+	RegComments   []fieldCommentPair
+	QueryComments []fieldCommentPair
+	Req           interface{}
+	SucRes        interface{}
+	ErrRes        []errRes
 
 	IsEntry bool // 是否 api 接口
 }
@@ -41,7 +41,11 @@ type R struct {
 func New(r *goa.RouterGroup, path string) *R {
 	return &R{
 		Info: routerInfo{
-			Path: path,
+			Path:           path,
+			ReqContentType: `application/json`,
+			RegComments:    make([]fieldCommentPair, 0),
+			QueryComments:  make([]fieldCommentPair, 0),
+			ErrRes:         make([]errRes, 0),
 		},
 		RouterGroup: r,
 		Nodes:       make([]*R, 0),
