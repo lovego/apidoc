@@ -25,30 +25,39 @@ func (r *R) ContentType(s string) *R {
 
 // Regex set request regex parameters.
 func (r *R) Regex(d string) *R {
-	r.Info.Desc = d
+	r.Info.RegComments = parseFieldCommentPair(d)
 	return r
 }
 
 // Query set request query parameters.
 func (r *R) Query(d string) *R {
-	r.Info.Desc = d
+	r.Info.QueryComments = parseFieldCommentPair(d)
 	return r
 }
 
 // Req set request body.
-func (r *R) Req(d string) *R {
-	r.Info.Desc = d
+func (r *R) Req(d interface{}) *R {
+	if d != nil && reflect.TypeOf(d).Kind() != reflect.Ptr {
+		panic(`Req need pointer`)
+	}
+	r.Info.Req = d
 	return r
 }
 
 // Res set success response body.
-func (r *R) Res(d string) *R {
-	r.Info.Desc = d
+func (r *R) Res(d interface{}) *R {
+	if d != nil && reflect.TypeOf(d).Kind() != reflect.Ptr {
+		panic(`Res need pointer`)
+	}
+	r.Info.SucRes = d
 	return r
 }
 
 // AddErrRes add error response bodies.
 func (r *R) AddErrRes(code string, msg string, data interface{}) *R {
+	if data != nil && reflect.TypeOf(data).Kind() != reflect.Ptr {
+		panic(`AddErrRes need pointer`)
+	}
 	obj := errRes{
 		Code:    code,
 		Message: msg,

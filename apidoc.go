@@ -36,12 +36,12 @@ func GenDocs(r *router.R, dirPath string) {
 		if err := os.MkdirAll(workDir, 0755); err != nil {
 			log.Panic(err)
 		}
-		l1 = append(l1, fmt.Sprintf(`[%s](%s)`, o.Info.Title, workDir))
+		l1 = append(l1, fmt.Sprintf(`[%s](%s)`, getTitle(r), workDir))
 
 		l2 := make([]string, 0)
 		for _, obj := range o.Nodes {
 			NewDoc(obj, o.Info.Path).Create(workDir, obj.Info.Path)
-			l2 = append(l2, fmt.Sprintf(`[%s](%s)`, obj.Info.Title, path.Join(workDir, obj.Info.Title+`.md`)))
+			l2 = append(l2, fmt.Sprintf(`[%s](%s)`, getTitle(r), path.Join(workDir, obj.Info.Path+`.md`)))
 		}
 
 		buf := []byte(strings.Join(l2, "\n"))
@@ -65,10 +65,11 @@ func NewDoc(r *router.R, basePath string) *Doc {
 		Indexes:  make([]string, 0),
 		Contents: make([]string, 0),
 	}
-	d.Indexes = append(d.Indexes, `# Base path: `+basePath)
-	d.Indexes = append(d.Indexes, `# Index <a name="index"></a>`)
+	d.Indexes = append(d.Indexes, fmt.Sprintf(`# %s <a name="index"></a>`, getTitle(r)))
 
-	d.Parse(r, basePath, 1)
+	for i := range r.Nodes {
+		d.Parse(r.Nodes[i], basePath, 1)
+	}
 	return d
 }
 
@@ -117,15 +118,20 @@ func (d *Doc) Parse(r *router.R, basePath string, level int) {
 	merge(r)
 	basePath += r.Info.Path
 	if !r.Info.IsEntry && r.Info.Path != `` && level < 3 {
+		anchorName := anchorNameReg.ReplaceAllStringFunc(basePath, func(s string) string {
+			res := `-`
+			return res
+		})
+
 		idx := strings.Repeat("\t", level-1) + `- `
-		idx += `[` + r.Info.Title + ` ` + r.Info.Path + `](#` + basePath + `)`
+		idx += `[` + getTitle(r) + `](#` + anchorName + `)`
 		d.Indexes = append(d.Indexes, idx)
-		content := "\n" + strings.Repeat("#", level) + ` `
-		content += r.Info.Title + ` ` + r.Info.Path
+		content := "\n" + strings.Repeat("#", level+1) + ` `
+		content += getTitle(r) + `<a name="` + anchorName + `"></a>`
 		d.Contents = append(d.Contents, content)
 		level += 1
 	}
-	if len(r.Nodes) == 0 {
+	if r.Info.IsEntry {
 		idx, c := parseRouterDoc(r, basePath, level)
 		d.Indexes = append(d.Indexes, idx)
 		d.Contents = append(d.Contents, c)
@@ -139,50 +145,70 @@ var anchorNameReg = regexp.MustCompile(`[^a-zA-Z0-9]+`)
 
 func parseRouterDoc(r *router.R, path string, level int) (idx, content string) {
 	docs := make([]string, 0)
-	name := r.Info.Method + anchorNameReg.ReplaceAllStringFunc(path, func(s string) string {
+	anchorName := r.Info.Method + anchorNameReg.ReplaceAllStringFunc(path, func(s string) string {
 		res := `-`
 		return res
 	})
-	title := "\n#### " + r.Info.Method + ` ` + path
-	if r.Info.Title != `` {
-		title += ` (` + r.Info.Title + `)`
-	}
-	title += `<a name="` + name + `"></a>`
-	title += ` [index](#index)`
+
+	// title
+	title := `#### ` + getTitle(r) + `<a name="` + anchorName + `"></a> [返回目录](#index)`
 	docs = append(docs, title)
 
+	// description
+	if r.Info.Desc != `` {
+		docs = append(docs, r.Info.Desc)
+	}
+
+	// URL
+	reqUrl := `##### ` + r.Info.Method + ` ` + path
+	docs = append(docs, reqUrl)
+
+	// RegComments
 	if len(r.Info.RegComments) > 0 {
 		docs = append(docs, "\n"+`##### 正则参数说明`)
 		for _, o := range r.Info.RegComments {
 			docs = append(docs, `- `+o.Field+`: `+o.Comment)
 		}
 	}
-
+	// QueryComments
 	if len(r.Info.QueryComments) > 0 {
 		docs = append(docs, "\n"+`##### Query 参数说明`)
 		for _, o := range r.Info.QueryComments {
 			docs = append(docs, `- `+o.Field+`: `+o.Comment)
 		}
 	}
+	// req
 	if r.Info.Req != nil {
-		docs = append(docs, "\n"+`##### Request Body`)
+		docs = append(docs, "\n"+`##### 请求体说明(`+r.Info.ReqContentType+`)`)
 		docs = append(docs, "```json5")
 		docs = append(docs, parseJsonDoc(defaults.Set(r.Info.Req)))
 		docs = append(docs, "```")
 	}
 
+	// SucRes
 	if r.Info.SucRes != nil {
-
 		res := BaseRes
 		res.Data = defaults.Set(r.Info.SucRes)
-		docs = append(docs, "\n"+`##### Response Body`)
+		docs = append(docs, "\n"+`##### 返回体说明`)
 		docs = append(docs, "```json5")
 		docs = append(docs, parseJsonDoc(&res))
 		docs = append(docs, "```")
 	}
-	docs = append(docs)
+	// error responses
+	if len(r.Info.ErrRes) > 0 {
+		docs = append(docs, "\n"+`##### 返回错误说明`)
+		for i := range r.Info.ErrRes {
+			o := &r.Info.ErrRes[i]
+			o.Data = defaults.Set(o.Data)
+			docs = append(docs, "\n"+`- 错误码：`+o.Code)
+			docs = append(docs, "```json5")
+			docs = append(docs, parseJsonDoc(o))
+			docs = append(docs, "```")
+		}
+	}
+	// index
 	idx = strings.Repeat("\t", level-1) + `- `
-	idx += `[` + r.Info.Title + ` ` + r.Info.Method + ` ` + r.Info.Path + `](#` + name + `)`
+	idx += `[` + getTitle(r) + `](#` + anchorName + `)`
 	content = strings.Join(docs, "\n")
 	return
 }
@@ -204,4 +230,13 @@ func parseJsonDoc(v interface{}) string {
 		}
 	}
 	return strings.Join(list, "\n")
+}
+
+// getTitle return router title, if is empty return "无标题"
+func getTitle(r *router.R) string {
+	t := r.Info.Title
+	if t == `` {
+		t = `无标题`
+	}
+	return t
 }
