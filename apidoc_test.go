@@ -23,10 +23,17 @@ type errorRes struct {
 }
 
 func ExampleGenDocs() {
-
+	router.ForDoc = true
 	goaRouter := goa.New()
 	rootRouter := router.New(&goaRouter.RouterGroup, `/root`)
-	purchaseRouter := rootRouter.Group(`/purchases`).Title(`采购`)
+
+	GenDocs(rootRouter, setup, `docs`)
+
+	// Output:
+}
+
+func setup(r *router.R) {
+	purchaseRouter := r.Group(`/purchases`).Title(`采购`)
 	arlRouter := purchaseRouter.Group(`/arrival`).Title(`到货单`)
 
 	arlRouter.Post(`/book`, func(c *goa.Context) {}).Title(`订餐`).
@@ -38,13 +45,9 @@ func ExampleGenDocs() {
 		AddErrRes(`something-wrong`, `some thing wrong`, &errorRes{}).
 		AddErrRes(`something-wrong2`, `some thing wrong2`, &errorRes{})
 
-	saleRouter := rootRouter.Group(`/sales`).Title(`销售`)
+	saleRouter := r.Group(`/sales`).Title(`销售`)
 	saleOrderRouter := saleRouter.Group(`/order`).Title(`订单`)
 	saleOrderRouter.GetX(`/detail/(\d+)`, func(c *goa.Context) {
 
 	}).Doc(`订单详情`, `ID:订单ID`, `name:用户名`, &req{}, &res{})
-
-	GenDocs(rootRouter, `docs`)
-
-	// Output:
 }

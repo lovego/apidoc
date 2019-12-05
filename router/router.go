@@ -38,6 +38,10 @@ type R struct {
 	Nodes       []*R
 }
 
+func NewRoot(r *goa.RouterGroup) *R {
+	return New(r, ``)
+}
+
 func New(r *goa.RouterGroup, path string) *R {
 	return &R{
 		Info: routerInfo{

@@ -22,7 +22,10 @@ type ResBodyTpl struct {
 
 var BaseRes = ResBodyTpl{Code: "ok", Message: "success"}
 
-func GenDocs(r *router.R, workDir string) {
+func GenDocs(r *router.R, setup func(r *router.R), workDir string) {
+	router.ForDoc = true
+	setup(r)
+
 	if err := os.RemoveAll(workDir); err != nil {
 		panic(err)
 	}
@@ -62,12 +65,13 @@ func genDocs(r *router.R, basePath, workDir string) {
 		}
 		genDocs(child, basePath, childDir)
 	}
-
-	indexesBuf := []byte(strings.Join(indexes, "\n"))
-	if err := ioutil.WriteFile(
-		filepath.Join(workDir, `README.md`), indexesBuf, 0666,
-	); err != nil {
-		log.Panic(err)
+	if len(indexes) > 0 {
+		indexesBuf := []byte(strings.Join(indexes, "\n"))
+		if err := ioutil.WriteFile(
+			filepath.Join(workDir, `README.md`), indexesBuf, 0666,
+		); err != nil {
+			log.Panic(err)
+		}
 	}
 }
 
