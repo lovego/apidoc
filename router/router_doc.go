@@ -7,6 +7,13 @@ import (
 
 // Title set router Title.
 func (r *R) Title(t string) *R {
+	t = strings.TrimSpace(t)
+	if strings.ContainsAny(t, `/`) {
+		panic(`Title contains '/' : ` + t)
+	}
+	if t[0] == '+' || t[0] == '-' || t[0] == '.' {
+		panic(`Title starts with '+-.' : ` + t)
+	}
 	r.Info.Title = t
 	return r
 }
@@ -69,15 +76,11 @@ func (r *R) AddErrRes(code string, msg string, data interface{}) *R {
 
 // Doc provide quick set common api docs.
 func (r *R) Doc(t string, reg, query string, req, res interface{}) *R {
-	if (req != nil && reflect.TypeOf(req).Kind() != reflect.Ptr) ||
-		(res != nil && reflect.TypeOf(res).Kind() != reflect.Ptr) {
-		panic(`Doc need pointer`)
-	}
-	r.Info.Title = t
-	r.Info.RegComments = parseFieldCommentPair(reg)
-	r.Info.QueryComments = parseFieldCommentPair(query)
-	r.Info.Req = req
-	r.Info.SucRes = res
+	r.Title(t)
+	r.Regex(reg)
+	r.Query(query)
+	r.Req(req)
+	r.Res(res)
 	return r
 }
 

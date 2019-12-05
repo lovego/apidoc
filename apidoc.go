@@ -23,6 +23,9 @@ type ResBodyTpl struct {
 var BaseRes = ResBodyTpl{Code: "ok", Message: "success"}
 
 func GenDocs(r *router.R, workDir string) {
+	if err := os.RemoveAll(workDir); err != nil {
+		panic(err)
+	}
 	merge(r)
 	genDocs(r, ``, workDir)
 }
@@ -32,7 +35,6 @@ func GenDocs(r *router.R, workDir string) {
 // dirPath is dictionary path.
 func genDocs(r *router.R, basePath, workDir string) {
 	basePath = basePath + r.Info.Path
-	currentWorkDir := workDir
 	if err := os.MkdirAll(workDir, 0755); err != nil {
 		log.Panic(err)
 	}
@@ -41,7 +43,6 @@ func genDocs(r *router.R, basePath, workDir string) {
 		child := r.Nodes[i]
 		title := child.Info.Title
 		if child.Info.IsEntry {
-			// 生成文档
 			fileName := title + `.md`
 			docStr := parseEntryDoc(child, basePath)
 			buf := []byte(docStr)
@@ -50,19 +51,21 @@ func genDocs(r *router.R, basePath, workDir string) {
 				log.Panic(err)
 			}
 			indexes = append(indexes, `[`+title+`](`+fullPath+`)`)
-		} else {
-			// group
-			if title != `` { // 有标题则认为需要创建新的子目录
-				workDir = path.Join(workDir, title)
-				indexes = append(indexes, `[`+title+`](`+workDir+`)`)
-			}
 		}
-		genDocs(child, basePath, workDir)
+
+		// If child router is not an entry and title is not empty,
+		// then create a sub directory.
+		childDir := workDir
+		if !child.Info.IsEntry && title != `` {
+			childDir = path.Join(workDir, title)
+			indexes = append(indexes, `[`+title+`](`+childDir+`)`)
+		}
+		genDocs(child, basePath, childDir)
 	}
 
-	indexesBuf := []byte(strings.Join(indexes, `\n`))
+	indexesBuf := []byte(strings.Join(indexes, "\n"))
 	if err := ioutil.WriteFile(
-		filepath.Join(currentWorkDir, `README.md`), indexesBuf, 0666,
+		filepath.Join(workDir, `README.md`), indexesBuf, 0666,
 	); err != nil {
 		log.Panic(err)
 	}
