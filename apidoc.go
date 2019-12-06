@@ -53,7 +53,7 @@ func genDocs(r *router.R, basePath, workDir string) {
 			if err := ioutil.WriteFile(fullPath, buf, 0666); err != nil {
 				log.Panic(err)
 			}
-			indexes = append(indexes, `[`+title+`](`+fullPath+`)`)
+			indexes = append(indexes, `### [`+title+`](`+fullPath+`)`)
 		}
 
 		// If child router is not an entry and title is not empty,
@@ -61,7 +61,7 @@ func genDocs(r *router.R, basePath, workDir string) {
 		childDir := workDir
 		if !child.Info.IsEntry && title != `` {
 			childDir = path.Join(workDir, title)
-			indexes = append(indexes, `[`+title+`](`+childDir+`)`)
+			indexes = append(indexes, `### [`+title+`](`+childDir+`)`)
 		}
 		genDocs(child, basePath, childDir)
 	}
