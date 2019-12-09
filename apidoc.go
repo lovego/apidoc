@@ -1,11 +1,12 @@
 package apidoc
 
 import (
+	"fmt"
 	"github.com/lovego/apidoc/router"
 	"io/ioutil"
 	"log"
 	"os"
-	"path"
+	//"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -16,52 +17,54 @@ import (
 
 var BaseRes = router.ResBodyTpl{Code: "ok", Message: "success"}
 var baseWorkDir = ``
+var unTitledIndex = 1
 
-func GenDocs(r *router.R, baseDir, relativeDir string) {
+func GenDocs(r *router.R, baseDir string) {
 	baseWorkDir = baseDir
-	if err := os.RemoveAll(filepath.Join(baseWorkDir, relativeDir)); err != nil {
+	if err := os.RemoveAll(baseWorkDir); err != nil {
 		panic(err)
 	}
 	merge(r)
-	genDocs(r, ``, relativeDir)
+	genDocs(r, ``, `.`)
 }
 
 // genDocs Generate doc.
 // basePath is base router path.
 // dirPath is dictionary path.
-func genDocs(r *router.R, basePath, relativeDir string) {
+func genDocs(r *router.R, basePath, workDir string) {
 	basePath = basePath + r.Info.Path
-	if err := os.MkdirAll(filepath.Join(baseWorkDir, relativeDir), 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(baseWorkDir, workDir), 0755); err != nil {
 		log.Panic(err)
 	}
 	indexes := make([]string, 0)
 	for i := range r.Nodes {
 		child := r.Nodes[i]
-		title := child.Info.Title
 		if child.Info.IsEntry {
-			fileName := title + `.md`
 			docStr := parseEntryDoc(child, basePath)
 			buf := []byte(docStr)
-			fullPath := filepath.Join(baseWorkDir, relativeDir, fileName)
+			fileName := child.Info.Title + `.md`
+			fullPath := filepath.Join(baseWorkDir, workDir, fileName)
 			if err := ioutil.WriteFile(fullPath, buf, 0666); err != nil {
 				log.Panic(err)
 			}
-			indexes = append(indexes, `### [`+title+`](`+path.Join(`/`, path.Join(relativeDir, fileName))+`)`)
+			linkUrl := filepath.Join(`.`, fileName)
+			indexes = append(indexes, `### [`+child.Info.Title+`](`+linkUrl+`)`)
 		}
 
 		// If child router is not an entry and title is not empty,
 		// then create a sub directory.
-		childDir := relativeDir
-		if !child.Info.IsEntry && title != `` {
-			childDir = path.Join(relativeDir, title)
-			indexes = append(indexes, `### [`+title+`](`+path.Join(`/`, childDir)+`)`)
+		childDir := workDir
+		if !child.Info.IsEntry && child.Info.Title != `` {
+			childDir = filepath.Join(workDir, child.Info.Title)
+			linkUrl := filepath.Join(`./`, child.Info.Title)
+			indexes = append(indexes, `### [`+child.Info.Title+`](`+linkUrl+`)`)
 		}
 		genDocs(child, basePath, childDir)
 	}
 	if len(indexes) > 0 {
 		indexesBuf := []byte(strings.Join(indexes, "\n"))
 		if err := ioutil.WriteFile(
-			filepath.Join(baseWorkDir, relativeDir, `README.md`), indexesBuf, 0666,
+			filepath.Join(baseWorkDir, workDir, `README.md`), indexesBuf, 0666,
 		); err != nil {
 			log.Panic(err)
 		}
@@ -104,6 +107,8 @@ func parseEntryDoc(r *router.R, basePath string) (content string) {
 	urlPath := basePath + r.Info.Path
 	if r.Info.Title == `` {
 		log.Println(`Warning: Title is required. API: ` + r.Info.Method + ` ` + urlPath)
+		r.Info.Title = fmt.Sprintf(`未命名%d`, unTitledIndex)
+		unTitledIndex += 1
 	}
 	docs := make([]string, 0)
 	// title

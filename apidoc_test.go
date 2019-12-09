@@ -4,6 +4,7 @@ import (
 	"github.com/lovego/apidoc/router"
 	"github.com/lovego/fs"
 	"github.com/lovego/goa"
+	"path/filepath"
 )
 
 type req struct {
@@ -27,7 +28,7 @@ func ExampleGenDocs() {
 	router.ForDoc = true
 	rootRouter := router.NewRoot(&goa.New().RouterGroup)
 	setup(rootRouter)
-	GenDocs(rootRouter, fs.SourceDir(), `apidocs`)
+	GenDocs(rootRouter, filepath.Join(fs.SourceDir(), `apidocs`))
 
 	// Output:
 }
