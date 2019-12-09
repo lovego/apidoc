@@ -10,25 +10,26 @@ rootRouter := router.NewRoot(&goa.New().RouterGroup)
 
 ### Router docs
 
-- Prepare request or response body structs.
+####  Prepare request or response body structs.
+
+JSON tag "doc" or "comment" will be parsed for fields comments. if it starts with '*', this field required.
 ```
 type Sample struct {
-    // JSON tag "doc" or "comment" will be parsed for fields comments
-    // and if starts with '*', this field required.
 	Name string `doc:"*名称"`
 	Age  string `json:"age" comment:"年龄"`
 }
 ```
-- Add api docs while writing router.
+#### Add api docs while writing router.
 
+- One line doc.
 ```
-// One line api doc.
 router.PostX(`/(\d+)`, func(c *goa.Context) {
     s := helpers.GetSession(c)
     ...
 }).Doc(`标题收货`, `orderId:采购订单ID`, `queryArg1:请求Query参数1`, &detail.DetailRes, &detail.DetailRes{})
-
-// More api doc description
+```
+- More doc.
+```
 router.
     Title(`订餐`).
     Desc(`路由描述信息`).
@@ -45,7 +46,7 @@ Run the code below at anywhere you like.
 ```
 router.ForDoc = true 
 
-... // setup r (*router.R)
+... // setup routers.
 
 GenDocs(r, `apidocs`)
 ```
