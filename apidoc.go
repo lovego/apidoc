@@ -103,7 +103,7 @@ func merge(r *router.R) {
 func parseEntryDoc(r *router.R, basePath string) (content string) {
 	urlPath := basePath + r.Info.Path
 	if r.Info.Title == `` {
-		log.Println(`Warning: Title is required. Path: ` + urlPath)
+		log.Println(`Warning: Title is required. API: ` + r.Info.Method + ` ` + urlPath)
 	}
 	docs := make([]string, 0)
 	// title
