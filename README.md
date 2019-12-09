@@ -3,46 +3,49 @@ Auto generate api docs from goa routers.
 
 ## Usage
 ### Routers
-Almost the same usage as `goa`.
 ```
 // Replace *goa.RouterGroup with *router.R
-r := router.New(goaRouter.Group(path), path)
-
-orders.Routes(r.Group(`/order`))
+rootRouter := router.NewRoot(&goa.New().RouterGroup)
 ```
 
 ### Router docs
 
-- Prepare request and response body structs
+- Prepare request or response body structs.
 ```
 type Sample struct {
-
-    // tags "c" or "comment" will be parsed for fields comments
-	Name string `c:"name你好"`
+    // JSON tag "doc" or "comment" will be parsed for fields comments
+    // and if starts with '*', this field required.
+	Name string `doc:"*名称"`
 	Age  string `json:"age" comment:"年龄"`
-	
-	// Map Slice Array Pointer will auto set one element for default.
-	Name2Id  map[int]types.Amount
-	List     *types.Basic
-	PtrList  [2]types.Amount
 }
 ```
-- Call `r.Doc()`.
+- Add api docs while writing router.
 
 ```
+// One line api doc.
 router.PostX(`/(\d+)`, func(c *goa.Context) {
     s := helpers.GetSession(c)
     ...
 }).Doc(`标题收货`, `orderId:采购订单ID`, `queryArg1:请求Query参数1`, &detail.DetailRes, &detail.DetailRes{})
+
+// More api doc description
+router.
+    Title(`订餐`).
+    Desc(`路由描述信息`).
+    Regex(`id:公司ID`).
+    Query(`id:公司ID;id2:公司ID2`).
+    Req(`请求体描述信息`, &req{}).
+    Res(`返回体描述信息`, &res{}).
+    ErrRes(`错误返回体描述信息`, `something-wrong`, `some thing wrong`, &errorRes{}).
 ```
 
 ### Generate docs
 
-Run the code below at somewhere you like.
-
+Run the code below at anywhere you like.
 ```
-path := `/purchases`
-r := purchases.Routes(goa.New(), path)
+router.ForDoc = true 
 
-apidoc.NewDoc(r).Create(fs.SourceDir(), r.Path)
+... // setup r (*router.R)
+
+GenDocs(r, `apidocs`)
 ```

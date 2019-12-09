@@ -8,18 +8,10 @@ import (
 func Set(ptr interface{}) interface{} {
 	v := reflect.ValueOf(ptr)
 	if reflect.TypeOf(ptr).Kind() == reflect.Ptr {
-		// panic(`default set need pointer.`)
 		v = reflect.ValueOf(ptr).Elem()
 	}
 	setField(v)
 	return v.Interface()
-	// if t.Kind() != reflect.Struct {
-	// 	return
-	// }
-	//
-	// for i := 0; i < t.NumField(); i++ {
-	// 	setField(v.Field(i))
-	// }
 }
 
 func setField(field reflect.Value) {

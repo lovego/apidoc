@@ -1156,7 +1156,11 @@ func typeFields(t reflect.Type) []field {
 						name = sf.Name
 					}
 					// FOR DOC START :
-					comment, _ := struct_tag.Lookup(string(sf.Tag), `c`)
+
+					comment, _ := struct_tag.Lookup(string(sf.Tag), `doc`)
+					if comment == `` {
+						comment, _ = struct_tag.Lookup(string(sf.Tag), `c`)
+					}
 					if comment == `` {
 						comment, _ = struct_tag.Lookup(string(sf.Tag), `comment`)
 					}
