@@ -15,11 +15,13 @@ func (r *R) Title(t string) *R {
 		return r
 	}
 	t = strings.TrimSpace(t)
-	if strings.ContainsAny(t, `/`) {
-		panic(`Title contains '/' : ` + t)
-	}
-	if t[0] == '+' || t[0] == '-' || t[0] == '.' {
-		panic(`Title starts with '+-.' : ` + t)
+	if t != `` {
+		if strings.ContainsAny(t, `/`) {
+			panic(`Title contains '/' : ` + t)
+		}
+		if t[0] == '+' || t[0] == '-' || t[0] == '.' {
+			panic(`Title starts with '+-.' : ` + t)
+		}
 	}
 	r.Info.Title = t
 	return r
