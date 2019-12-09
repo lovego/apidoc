@@ -15,21 +15,23 @@ import (
 )
 
 var BaseRes = router.ResBodyTpl{Code: "ok", Message: "success"}
+var baseWorkDir = ``
 
-func GenDocs(r *router.R, workDir string) {
-	if err := os.RemoveAll(workDir); err != nil {
+func GenDocs(r *router.R, baseDir, relativeDir string) {
+	baseWorkDir = baseDir
+	if err := os.RemoveAll(filepath.Join(baseWorkDir, relativeDir)); err != nil {
 		panic(err)
 	}
 	merge(r)
-	genDocs(r, ``, workDir)
+	genDocs(r, ``, relativeDir)
 }
 
 // genDocs Generate doc.
 // basePath is base router path.
 // dirPath is dictionary path.
-func genDocs(r *router.R, basePath, workDir string) {
+func genDocs(r *router.R, basePath, relativeDir string) {
 	basePath = basePath + r.Info.Path
-	if err := os.MkdirAll(workDir, 0755); err != nil {
+	if err := os.MkdirAll(filepath.Join(baseWorkDir, relativeDir), 0755); err != nil {
 		log.Panic(err)
 	}
 	indexes := make([]string, 0)
@@ -40,18 +42,18 @@ func genDocs(r *router.R, basePath, workDir string) {
 			fileName := title + `.md`
 			docStr := parseEntryDoc(child, basePath)
 			buf := []byte(docStr)
-			fullPath := filepath.Join(workDir, fileName)
+			fullPath := filepath.Join(baseWorkDir, relativeDir, fileName)
 			if err := ioutil.WriteFile(fullPath, buf, 0666); err != nil {
 				log.Panic(err)
 			}
-			indexes = append(indexes, `### [`+title+`](`+path.Join(`/`, fullPath)+`)`)
+			indexes = append(indexes, `### [`+title+`](`+path.Join(`/`, path.Join(relativeDir, fileName))+`)`)
 		}
 
 		// If child router is not an entry and title is not empty,
 		// then create a sub directory.
-		childDir := workDir
+		childDir := relativeDir
 		if !child.Info.IsEntry && title != `` {
-			childDir = path.Join(workDir, title)
+			childDir = path.Join(relativeDir, title)
 			indexes = append(indexes, `### [`+title+`](`+path.Join(`/`, childDir)+`)`)
 		}
 		genDocs(child, basePath, childDir)
@@ -59,7 +61,7 @@ func genDocs(r *router.R, basePath, workDir string) {
 	if len(indexes) > 0 {
 		indexesBuf := []byte(strings.Join(indexes, "\n"))
 		if err := ioutil.WriteFile(
-			filepath.Join(workDir, `README.md`), indexesBuf, 0666,
+			filepath.Join(baseWorkDir, relativeDir, `README.md`), indexesBuf, 0666,
 		); err != nil {
 			log.Panic(err)
 		}

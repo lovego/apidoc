@@ -2,6 +2,7 @@ package apidoc
 
 import (
 	"github.com/lovego/apidoc/router"
+	"github.com/lovego/fs"
 	"github.com/lovego/goa"
 )
 
@@ -26,7 +27,7 @@ func ExampleGenDocs() {
 	router.ForDoc = true
 	rootRouter := router.NewRoot(&goa.New().RouterGroup)
 	setup(rootRouter)
-	GenDocs(rootRouter, `apidocs`)
+	GenDocs(rootRouter, fs.SourceDir(), `apidocs`)
 
 	// Output:
 }
