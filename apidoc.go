@@ -16,10 +16,7 @@ import (
 
 var BaseRes = router.ResBodyTpl{Code: "ok", Message: "success"}
 
-func GenDocs(r *router.R, setup func(r *router.R), workDir string) {
-	router.ForDoc = true
-	setup(r)
-
+func GenDocs(r *router.R, workDir string) {
 	if err := os.RemoveAll(workDir); err != nil {
 		panic(err)
 	}

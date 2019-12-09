@@ -24,10 +24,9 @@ type errorRes struct {
 
 func ExampleGenDocs() {
 	router.ForDoc = true
-	goaRouter := goa.New()
-	rootRouter := router.New(&goaRouter.RouterGroup, `/root`)
-
-	GenDocs(rootRouter, setup, `docs`)
+	rootRouter := router.NewRoot(&goa.New().RouterGroup)
+	setup(rootRouter)
+	GenDocs(rootRouter, `docs`)
 
 	// Output:
 }

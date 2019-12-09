@@ -10,7 +10,7 @@ import (
 
 func ExampleRouterTree() {
 	router := goa.New()
-	r := New(router.Group(`/root`), `root`)
+	r := NewRoot(&router.RouterGroup)
 	g1 := r.Group(`/group1`).Title(`分组1`)
 	//g2 := r.Group(`/group2`).Title(`分组2`)
 	g1.GetX(`/users`, func(c *goa.Context) {}).Doc(`用户`, ``, ``, nil, nil)
