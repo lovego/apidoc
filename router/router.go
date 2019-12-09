@@ -9,10 +9,23 @@ type fieldCommentPair struct {
 	Comment string
 }
 
-type errRes struct {
+type ResBodyTpl struct {
 	Code    string      `json:"code" c:"ok 表示成功，其他表示错误代码"`
 	Message string      `json:"message" c:"与code对应的描述信息"`
 	Data    interface{} `json:"data"`
+}
+
+const (
+	TypeReqBody uint8 = iota
+	TypeResBody
+	TypeErrResBody
+)
+
+// TODO
+type roundTripBody struct {
+	Type uint8 // 请求体/成功返回体/错误返回体
+	Desc string
+	Body interface{}
 }
 
 type routerInfo struct {
@@ -25,9 +38,13 @@ type routerInfo struct {
 
 	RegComments   []fieldCommentPair
 	QueryComments []fieldCommentPair
-	Req           interface{}
-	SucRes        interface{}
-	ErrRes        []errRes
+	// 保存请求体/成功返回体/错误返回体，数据的数组。并以此顺序生成文档。
+
+	RoundTripBodies []roundTripBody
+
+	//Req           interface{}
+	//SucRes        interface{}
+	//ErrRes        []ResBodyTpl
 
 	IsEntry bool // 是否 api 接口
 }
@@ -45,11 +62,11 @@ func NewRoot(r *goa.RouterGroup) *R {
 func New(r *goa.RouterGroup, path string) *R {
 	return &R{
 		Info: routerInfo{
-			Path:           path,
-			ReqContentType: `application/json`,
-			RegComments:    make([]fieldCommentPair, 0),
-			QueryComments:  make([]fieldCommentPair, 0),
-			ErrRes:         make([]errRes, 0),
+			Path:            path,
+			ReqContentType:  `application/json`,
+			RegComments:     make([]fieldCommentPair, 0),
+			QueryComments:   make([]fieldCommentPair, 0),
+			RoundTripBodies: make([]roundTripBody, 0),
 		},
 		RouterGroup: r,
 		Nodes:       make([]*R, 0),

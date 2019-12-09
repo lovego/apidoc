@@ -40,10 +40,11 @@ func setup(r *router.R) {
 		Desc(`描述信息描述信息描述信息描述信息描述信息描述信息描述信息`).
 		Regex(`id:公司ID`).
 		Query(`qid:公司QID;qid2:公司`).
-		Req(&req{}).
-		Res(&res{}).
-		AddErrRes(`something-wrong`, `some thing wrong`, &errorRes{}).
-		AddErrRes(`something-wrong2`, `some thing wrong2`, &errorRes{})
+		Req(`描述信息描述信息描述信息描述信息描述信息描述信息描述信息req1`, &req{}).
+		Req(`描述信息描述信息描述信息描述信息描述信息描述信息描述信息req2`, &req{}).
+		Res(`描述信息描述信息描述信息描述信息描述信息描述信息描述信息res1`, &res{}).
+		ErrRes(`描述信息描述信息描述信息描述信息描述信息描述信息描述信息err1`, `something-wrong`, `some thing wrong`, &errorRes{}).
+		ErrRes(`描述信息描述信息描述信息描述信息描述信息描述信息描述信息err2`, `something-wrong2`, `some thing wrong2`, &errorRes{})
 
 	saleRouter := r.Group(`/sales`).Title(`销售`)
 	saleOrderRouter := saleRouter.Group(`/order`).Title(`订单`)

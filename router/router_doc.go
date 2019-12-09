@@ -62,43 +62,59 @@ func (r *R) Query(d string) *R {
 }
 
 // Req set request body.
-func (r *R) Req(d interface{}) *R {
+func (r *R) Req(desc string, d interface{}) *R {
 	if !ForDoc {
 		return r
 	}
 	if d != nil && reflect.TypeOf(d).Kind() != reflect.Ptr {
 		panic(`Req need pointer`)
 	}
-	r.Info.Req = d
+	roundTripInfo := roundTripBody{
+		Type: TypeReqBody,
+		Desc: desc,
+		Body: d,
+	}
+	r.Info.RoundTripBodies = append(r.Info.RoundTripBodies, roundTripInfo)
 	return r
 }
 
 // Res set success response body.
-func (r *R) Res(d interface{}) *R {
+func (r *R) Res(desc string, d interface{}) *R {
 	if !ForDoc {
 		return r
 	}
 	if d != nil && reflect.TypeOf(d).Kind() != reflect.Ptr {
 		panic(`Res need pointer`)
 	}
-	r.Info.SucRes = d
+
+	roundTripInfo := roundTripBody{
+		Type: TypeResBody,
+		Desc: desc,
+		Body: d,
+	}
+	r.Info.RoundTripBodies = append(r.Info.RoundTripBodies, roundTripInfo)
 	return r
 }
 
-// AddErrRes add error response bodies.
-func (r *R) AddErrRes(code string, msg string, data interface{}) *R {
+// ErrRes add error response bodies.
+func (r *R) ErrRes(desc, code string, msg string, data interface{}) *R {
 	if !ForDoc {
 		return r
 	}
 	if data != nil && reflect.TypeOf(data).Kind() != reflect.Ptr {
-		panic(`AddErrRes need pointer`)
+		panic(`ErrRes need pointer`)
 	}
-	obj := errRes{
+	obj := ResBodyTpl{
 		Code:    code,
 		Message: msg,
 		Data:    data,
 	}
-	r.Info.ErrRes = append(r.Info.ErrRes, obj)
+	roundTripInfo := roundTripBody{
+		Type: TypeErrResBody,
+		Desc: desc,
+		Body: obj,
+	}
+	r.Info.RoundTripBodies = append(r.Info.RoundTripBodies, roundTripInfo)
 	return r
 }
 
@@ -110,8 +126,8 @@ func (r *R) Doc(t string, reg, query string, req, res interface{}) *R {
 	r.Title(t)
 	r.Regex(reg)
 	r.Query(query)
-	r.Req(req)
-	r.Res(res)
+	r.Req(`请求体描述信息，请求体描述信息`, req)
+	r.Res(`返回体描述信息`, res)
 	return r
 }
 

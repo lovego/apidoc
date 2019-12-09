@@ -14,13 +14,7 @@ import (
 	"github.com/lovego/apidoc/json_doc"
 )
 
-type ResBodyTpl struct {
-	Code    string      `json:"code" c:"ok 表示成功，其他表示错误代码"`
-	Message string      `json:"message" c:"与code对应的描述信息"`
-	Data    interface{} `json:"data"`
-}
-
-var BaseRes = ResBodyTpl{Code: "ok", Message: "success"}
+var BaseRes = router.ResBodyTpl{Code: "ok", Message: "success"}
 
 func GenDocs(r *router.R, setup func(r *router.R), workDir string) {
 	router.ForDoc = true
@@ -137,35 +131,44 @@ func parseEntryDoc(r *router.R, basePath string) (content string) {
 			docs = append(docs, `- `+o.Field+`: `+o.Comment)
 		}
 	}
-	// req
-	if r.Info.Req != nil {
-		docs = append(docs, "\n"+`## 请求体说明(`+r.Info.ReqContentType+`)`)
-		docs = append(docs, "```json5")
-		docs = append(docs, parseJsonDoc(defaults.Set(r.Info.Req)))
-		docs = append(docs, "```")
-	}
 
-	// SucRes
-	if r.Info.SucRes != nil {
-		res := BaseRes
-		res.Data = defaults.Set(r.Info.SucRes)
-		docs = append(docs, "\n"+`## 返回体说明`)
-		docs = append(docs, "```json5")
-		docs = append(docs, parseJsonDoc(&res))
-		docs = append(docs, "```")
-	}
-	// error responses
-	if len(r.Info.ErrRes) > 0 {
-		docs = append(docs, "\n"+`## 返回错误说明`)
-		for i := range r.Info.ErrRes {
-			o := &r.Info.ErrRes[i]
-			o.Data = defaults.Set(o.Data)
-			docs = append(docs, "\n"+`### 错误码：`+o.Code)
+	for i := range r.Info.RoundTripBodies {
+		o := &r.Info.RoundTripBodies[i]
+		switch o.Type {
+		case router.TypeReqBody:
+			docs = append(docs, "\n"+`## 请求体说明(`+r.Info.ReqContentType+`)`)
+			if o.Desc != `` {
+				docs = append(docs, "\n"+o.Desc)
+			}
 			docs = append(docs, "```json5")
-			docs = append(docs, parseJsonDoc(o))
+			docs = append(docs, parseJsonDoc(defaults.Set(o.Body)))
 			docs = append(docs, "```")
+		case router.TypeResBody:
+			res := BaseRes
+			res.Data = defaults.Set(o.Body)
+			docs = append(docs, "\n"+`## 返回体说明`)
+			if o.Desc != `` {
+				docs = append(docs, "\n"+o.Desc)
+			}
+			docs = append(docs, "```json5")
+			docs = append(docs, parseJsonDoc(&res))
+			docs = append(docs, "```")
+		case router.TypeErrResBody:
+			if obj, ok := o.Body.(router.ResBodyTpl); ok {
+				docs = append(docs, "\n"+`## 返回错误说明: 错误码（`+obj.Code+`）`)
+				if o.Desc != `` {
+					docs = append(docs, "\n"+o.Desc)
+				}
+				obj.Data = defaults.Set(obj.Data)
+				docs = append(docs, "```json5")
+				docs = append(docs, parseJsonDoc(&obj))
+				docs = append(docs, "```")
+			} else {
+				panic(`errResBody type error`)
+			}
 		}
 	}
+
 	content = strings.Join(docs, "\n")
 	return
 }
