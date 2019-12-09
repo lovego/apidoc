@@ -40,14 +40,16 @@ func setup(r *router.R) {
 		Regex(`id:公司ID`).
 		Query(`qid:公司QID;qid2:公司`).
 		Req(`描述信息描述信息描述信息描述信息描述信息描述信息描述信息req1`, &req{}).
-		Req(`描述信息描述信息描述信息描述信息描述信息描述信息描述信息req2`, &req{}).
+		Req(`描述信息描述信息描述信息描述信息描述信息描述信息描述信息req2`, nil).
 		Res(`描述信息描述信息描述信息描述信息描述信息描述信息描述信息res1`, &res{}).
+		Res(`描述信息描述信息描述信息描述信息描述信息描述信息描述信息res2`, nil).
 		ErrRes(`描述信息描述信息描述信息描述信息描述信息描述信息描述信息err1`, `something-wrong`, `some thing wrong`, &errorRes{}).
-		ErrRes(`描述信息描述信息描述信息描述信息描述信息描述信息描述信息err2`, `something-wrong2`, `some thing wrong2`, &errorRes{})
+		ErrRes(`描述信息描述信息描述信息描述信息描述信息描述信息描述信息err2`, `something-wrong2`, `some thing wrong2`, nil)
 
 	saleRouter := r.Group(`/sales`).Title(`销售`)
 	saleOrderRouter := saleRouter.Group(`/order`).Title(`订单`)
-	saleOrderRouter.GetX(`/detail/(\d+)`, func(c *goa.Context) {
-
-	}).Doc(`订单详情`, `ID:订单ID`, `name:用户名`, &req{}, &res{})
+	saleOrderRouter.GetX(`/detail/(\d+)`, func(c *goa.Context) {}).
+		Doc(`获取订单详情`, `ID:订单ID`, `name:用户名`, nil, nil)
+	saleOrderRouter.PutX(`/detail/(\d+)`, func(c *goa.Context) {}).
+		Doc(`更新订单详情`, `ID:订单ID`, `name:用户名`, &req{}, &res{})
 }
