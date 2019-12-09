@@ -66,7 +66,10 @@ func (r *R) Req(desc string, d interface{}) *R {
 	if !ForDoc {
 		return r
 	}
-	if d != nil && reflect.TypeOf(d).Kind() != reflect.Ptr {
+	if d == nil {
+		return r
+	}
+	if reflect.TypeOf(d).Kind() != reflect.Ptr {
 		panic(`Req need pointer`)
 	}
 	roundTripInfo := roundTripBody{
@@ -83,7 +86,10 @@ func (r *R) Res(desc string, d interface{}) *R {
 	if !ForDoc {
 		return r
 	}
-	if d != nil && reflect.TypeOf(d).Kind() != reflect.Ptr {
+	if d == nil {
+		return r
+	}
+	if reflect.TypeOf(d).Kind() != reflect.Ptr {
 		panic(`Res need pointer`)
 	}
 
@@ -101,7 +107,10 @@ func (r *R) ErrRes(desc, code string, msg string, data interface{}) *R {
 	if !ForDoc {
 		return r
 	}
-	if data != nil && reflect.TypeOf(data).Kind() != reflect.Ptr {
+	if data == nil {
+		return r
+	}
+	if reflect.TypeOf(data).Kind() != reflect.Ptr {
 		panic(`ErrRes need pointer`)
 	}
 	obj := ResBodyTpl{

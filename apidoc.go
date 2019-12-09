@@ -156,10 +156,12 @@ func parseEntryDoc(r *router.R, basePath string) (content string) {
 				if o.Desc != `` {
 					docs = append(docs, "\n"+o.Desc)
 				}
-				obj.Data = defaults.Set(obj.Data)
-				docs = append(docs, "```json5")
-				docs = append(docs, parseJsonDoc(&obj))
-				docs = append(docs, "```")
+				if obj.Data != nil {
+					obj.Data = defaults.Set(obj.Data)
+					docs = append(docs, "```json5")
+					docs = append(docs, parseJsonDoc(&obj))
+					docs = append(docs, "```")
+				}
 			} else {
 				panic(`errResBody type error`)
 			}
