@@ -26,7 +26,7 @@ func ExampleGenDocs() {
 	router.ForDoc = true
 	rootRouter := router.NewRoot(&goa.New().RouterGroup)
 	setup(rootRouter)
-	GenDocs(rootRouter, `docs`)
+	GenDocs(rootRouter, `apidocs`)
 
 	// Output:
 }
