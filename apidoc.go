@@ -16,16 +16,14 @@ import (
 )
 
 var BaseRes = router.ResBodyTpl{Code: "ok", Message: "success"}
-var baseWorkDir = ``
-var unTitledIndex = 1
+var untitledIndex = 1
 
-func GenDocs(r *router.R, baseDir string) {
-	baseWorkDir = baseDir
-	if err := os.RemoveAll(baseWorkDir); err != nil {
+func GenDocs(r *router.R, workDir string) {
+	if err := os.RemoveAll(workDir); err != nil {
 		panic(err)
 	}
 	merge(r)
-	genDocs(r, ``, `.`)
+	genDocs(r, ``, workDir)
 }
 
 // genDocs Generate doc.
@@ -33,7 +31,7 @@ func GenDocs(r *router.R, baseDir string) {
 // dirPath is dictionary path.
 func genDocs(r *router.R, basePath, workDir string) {
 	basePath = basePath + r.Info.Path
-	if err := os.MkdirAll(filepath.Join(baseWorkDir, workDir), 0755); err != nil {
+	if err := os.MkdirAll(workDir, 0755); err != nil {
 		log.Panic(err)
 	}
 	indexes := make([]string, 0)
@@ -43,12 +41,11 @@ func genDocs(r *router.R, basePath, workDir string) {
 			docStr := parseEntryDoc(child, basePath)
 			buf := []byte(docStr)
 			fileName := child.Info.Title + `.md`
-			fullPath := filepath.Join(baseWorkDir, workDir, fileName)
+			fullPath := filepath.Join(workDir, fileName)
 			if err := ioutil.WriteFile(fullPath, buf, 0666); err != nil {
 				log.Panic(err)
 			}
-			linkUrl := filepath.Join(`.`, fileName)
-			indexes = append(indexes, `### [`+child.Info.Title+`](`+linkUrl+`)`)
+			indexes = append(indexes, `### [`+child.Info.Title+`](`+fileName+`)`)
 		}
 
 		// If child router is not an entry and title is not empty,
@@ -56,15 +53,14 @@ func genDocs(r *router.R, basePath, workDir string) {
 		childDir := workDir
 		if !child.Info.IsEntry && child.Info.Title != `` {
 			childDir = filepath.Join(workDir, child.Info.Title)
-			linkUrl := filepath.Join(`./`, child.Info.Title)
-			indexes = append(indexes, `### [`+child.Info.Title+`](`+linkUrl+`)`)
+			indexes = append(indexes, `### [`+child.Info.Title+`](`+child.Info.Title+`)`)
 		}
 		genDocs(child, basePath, childDir)
 	}
 	if len(indexes) > 0 {
 		indexesBuf := []byte(strings.Join(indexes, "\n"))
 		if err := ioutil.WriteFile(
-			filepath.Join(baseWorkDir, workDir, `README.md`), indexesBuf, 0666,
+			filepath.Join(workDir, `README.md`), indexesBuf, 0666,
 		); err != nil {
 			log.Panic(err)
 		}
@@ -107,8 +103,8 @@ func parseEntryDoc(r *router.R, basePath string) (content string) {
 	urlPath := basePath + r.Info.Path
 	if r.Info.Title == `` {
 		log.Println(`Warning: Title is required. API: ` + r.Info.Method + ` ` + urlPath)
-		r.Info.Title = fmt.Sprintf(`未命名%d`, unTitledIndex)
-		unTitledIndex += 1
+		r.Info.Title = fmt.Sprintf(`未命名%d`, untitledIndex)
+		untitledIndex += 1
 	}
 	docs := make([]string, 0)
 	// title
