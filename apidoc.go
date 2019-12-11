@@ -1,7 +1,6 @@
 package apidoc
 
 import (
-	"fmt"
 	"github.com/lovego/apidoc/router"
 	"io/ioutil"
 	"log"
@@ -16,7 +15,6 @@ import (
 )
 
 var BaseRes = router.ResBodyTpl{Code: "ok", Message: "success"}
-var untitledIndex = 1
 
 func GenDocs(r *router.R, workDir string) {
 	if err := os.RemoveAll(workDir); err != nil {
@@ -38,6 +36,10 @@ func genDocs(r *router.R, basePath, workDir string) {
 	for i := range r.Nodes {
 		child := r.Nodes[i]
 		if child.Info.IsEntry {
+			if child.Info.Title == `` {
+				log.Println(`Warning: Title is required. API: ` + r.Info.Method + ` ` + basePath + child.Info.Path)
+				continue
+			}
 			docStr := parseEntryDoc(child, basePath)
 			buf := []byte(docStr)
 			fileName := child.Info.Title + `.md`
@@ -101,11 +103,6 @@ func merge(r *router.R) {
 
 func parseEntryDoc(r *router.R, basePath string) (content string) {
 	urlPath := basePath + r.Info.Path
-	if r.Info.Title == `` {
-		log.Println(`Warning: Title is required. API: ` + r.Info.Method + ` ` + urlPath)
-		r.Info.Title = fmt.Sprintf(`未命名%d`, untitledIndex)
-		untitledIndex += 1
-	}
 	docs := make([]string, 0)
 	// title
 	title := `# ` + r.Info.Title
