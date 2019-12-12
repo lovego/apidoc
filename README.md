@@ -1,18 +1,17 @@
 # apidoc
 Auto generate api docs from goa routers.
 
-## Usage
+## Usages
 ### Routers
+Replace *goa.RouterGroup with *router.R
 ```
-// Replace *goa.RouterGroup with *router.R
 rootRouter := router.NewRoot(&goa.New().RouterGroup)
 ```
 
 ### Router docs
 
 ####  Prepare request or response body structs.
-
-JSON tag "doc" or "comment" will be parsed for fields comments. if it starts with '*', this field required.
+JSON tag "doc" or "comment" will be parsed as fields comments. if it starts with '*', then this field is required.
 ```
 type Sample struct {
 	Name string `doc:"*名称"`
@@ -20,15 +19,21 @@ type Sample struct {
 }
 ```
 #### Add api docs while writing router.
+There are two ways to add docs to a router. 
 
-- One line doc.
+##### One line docs.
+
+`Doc` add docs in one line for common situation. 
 ```
 router.PostX(`/(\d+)`, func(c *goa.Context) {
     s := helpers.GetSession(c)
     ...
 }).Doc(`标题收货`, `orderId:采购订单ID`, `queryArg1:请求Query参数1`, &detail.DetailRes, &detail.DetailRes{})
 ```
-- More doc.
+##### More docs.
+
+The other way is to call `Title`,`Desc`,`Regex`,`Query`,`Req`,`Res`, or `ErrRes` individually.
+`Req`,`Res` and `ErrRes` will append docs to an array, so it will be parsed one by one.
 ```
 router.
     Title(`订餐`).
