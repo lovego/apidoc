@@ -153,11 +153,15 @@ func parseFieldCommentPair(src string) (list []fieldCommentPair) {
 	}
 	pairs := strings.Split(src, ";")
 	for i := range pairs {
-		parts := strings.Split(pairs[i], ":")
+		item := strings.TrimSpace(pairs[i])
+		if item == `` {
+			continue
+		}
+		parts := strings.Split(item, ":")
 		if len(parts) > 0 {
-			p := fieldCommentPair{Field: parts[0]}
+			p := fieldCommentPair{Field: strings.TrimSpace(parts[0])}
 			if len(parts) > 1 {
-				p.Comment = parts[1]
+				p.Comment = strings.TrimSpace(parts[1])
 			}
 			list = append(list, p)
 		}

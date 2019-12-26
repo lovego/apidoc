@@ -44,6 +44,9 @@ func genDocs(r *router.R, basePath, workDir string) {
 			buf := []byte(docStr)
 			fileName := child.Info.Title + `.md`
 			fullPath := filepath.Join(workDir, fileName)
+			if _, err := os.Stat(fullPath); err == nil {
+				panic(`Error: ` + fileName + ` is exist, are you using a existing title ?`)
+			}
 			if err := ioutil.WriteFile(fullPath, buf, 0666); err != nil {
 				log.Panic(err)
 			}
