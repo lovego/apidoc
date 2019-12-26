@@ -135,6 +135,7 @@ func parseEntryDoc(r *router.R, basePath string) (content string) {
 		}
 	}
 
+	var hasResBody = false
 	for i := range r.Info.RoundTripBodies {
 		o := &r.Info.RoundTripBodies[i]
 		switch o.Type {
@@ -147,6 +148,7 @@ func parseEntryDoc(r *router.R, basePath string) (content string) {
 			docs = append(docs, parseJsonDoc(defaults.Set(o.Body)))
 			docs = append(docs, "```")
 		case router.TypeResBody:
+			hasResBody = true
 			res := BaseRes
 			if o.Body != nil {
 				res.Data = defaults.Set(o.Body)
@@ -174,6 +176,14 @@ func parseEntryDoc(r *router.R, basePath string) (content string) {
 				panic(`errResBody type error`)
 			}
 		}
+	}
+
+	if !hasResBody {
+		res := BaseRes
+		docs = append(docs, "\n"+`## 返回体说明`)
+		docs = append(docs, "```json5")
+		docs = append(docs, parseJsonDoc(&res))
+		docs = append(docs, "```")
 	}
 
 	content = strings.Join(docs, "\n")
