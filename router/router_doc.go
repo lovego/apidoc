@@ -92,10 +92,7 @@ func (r *R) Res(desc string, d interface{}) *R {
 	if !ForDoc {
 		return r
 	}
-	if d == nil {
-		return r
-	}
-	if reflect.TypeOf(d).Kind() != reflect.Ptr {
+	if d != nil && reflect.TypeOf(d).Kind() != reflect.Ptr {
 		panic(`Res need pointer`)
 	}
 
@@ -141,8 +138,10 @@ func (r *R) Doc(t string, reg, query string, req, res interface{}) *R {
 	r.Title(t)
 	r.Regex(reg)
 	r.Query(query)
-	r.Req(`请求体描述信息，请求体描述信息`, req)
-	r.Res(`返回体描述信息`, res)
+	if req != nil {
+		r.Req(``, req)
+	}
+	r.Res(``, res)
 	return r
 }
 

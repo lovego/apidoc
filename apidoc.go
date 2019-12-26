@@ -148,7 +148,9 @@ func parseEntryDoc(r *router.R, basePath string) (content string) {
 			docs = append(docs, "```")
 		case router.TypeResBody:
 			res := BaseRes
-			res.Data = defaults.Set(o.Body)
+			if o.Body != nil {
+				res.Data = defaults.Set(o.Body)
+			}
 			docs = append(docs, "\n"+`## 返回体说明`)
 			if o.Desc != `` {
 				docs = append(docs, "\n"+o.Desc)
