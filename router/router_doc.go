@@ -1,6 +1,7 @@
 package router
 
 import (
+	"log"
 	"reflect"
 	"strings"
 )
@@ -22,6 +23,9 @@ func (r *R) Title(t string) *R {
 		if t[0] == '+' || t[0] == '-' || t[0] == '.' {
 			panic(`Title starts with '+-.' : ` + t)
 		}
+	}
+	if r.Info.Title != `` {
+		log.Println(`Warning: Title is reassigned. old: ` + r.Info.Title + ` new: ` + t)
 	}
 	r.Info.Title = t
 	return r
