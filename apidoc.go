@@ -20,7 +20,7 @@ func GenDocs(r *router.R, workDir string) {
 	if err := os.RemoveAll(workDir); err != nil {
 		panic(err)
 	}
-	merge(r)
+	//merge(r)
 	genDocs(r, ``, workDir)
 }
 
