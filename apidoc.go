@@ -1,17 +1,14 @@
 package apidoc
 
 import (
-	"github.com/lovego/apidoc/router"
 	"io/ioutil"
 	"log"
 	"os"
-	//"path"
 	"path/filepath"
-	"regexp"
 	"strings"
 
-	"github.com/lovego/apidoc/defaults"
-	"github.com/lovego/apidoc/json_doc"
+	"github.com/lovego/apidoc/router"
+	"github.com/lovego/jsondoc"
 )
 
 var BaseRes = router.ResBodyTpl{Code: "ok", Message: "success"}
@@ -145,20 +142,20 @@ func parseEntryDoc(r *router.R, basePath string) (content string) {
 				docs = append(docs, "\n"+o.Desc)
 			}
 			docs = append(docs, "```json5")
-			docs = append(docs, parseJsonDoc(defaults.Set(o.Body)))
+			docs = append(docs, makeJsonDoc(o.Body))
 			docs = append(docs, "```")
 		case router.TypeResBody:
 			hasResBody = true
 			res := BaseRes
 			if o.Body != nil {
-				res.Data = defaults.Set(o.Body)
+				res.Data = o.Body
 			}
 			docs = append(docs, "\n"+`## 返回体说明`)
 			if o.Desc != `` {
 				docs = append(docs, "\n"+o.Desc)
 			}
 			docs = append(docs, "```json5")
-			docs = append(docs, parseJsonDoc(&res))
+			docs = append(docs, makeJsonDoc(&res))
 			docs = append(docs, "```")
 		case router.TypeErrResBody:
 			if obj, ok := o.Body.(router.ResBodyTpl); ok {
@@ -167,9 +164,9 @@ func parseEntryDoc(r *router.R, basePath string) (content string) {
 					docs = append(docs, "\n"+o.Desc)
 				}
 				if obj.Data != nil {
-					obj.Data = defaults.Set(obj.Data)
+					obj.Data = obj.Data
 					docs = append(docs, "```json5")
-					docs = append(docs, parseJsonDoc(&obj))
+					docs = append(docs, makeJsonDoc(&obj))
 					docs = append(docs, "```")
 				}
 			} else {
@@ -182,7 +179,7 @@ func parseEntryDoc(r *router.R, basePath string) (content string) {
 		res := BaseRes
 		docs = append(docs, "\n"+`## 返回体说明`)
 		docs = append(docs, "```json5")
-		docs = append(docs, parseJsonDoc(&res))
+		docs = append(docs, makeJsonDoc(&res))
 		docs = append(docs, "```")
 	}
 
@@ -190,30 +187,10 @@ func parseEntryDoc(r *router.R, basePath string) (content string) {
 	return
 }
 
-func parseJsonDoc(v interface{}) string {
-	const commentLineOffset = 50
-	data, err := json_doc.MarshalIndent(v, ``, `  `)
+func makeJsonDoc(v interface{}) string {
+	data, err := jsondoc.MarshalIndent(v, ``, `  `)
 	if err != nil {
 		log.Panic(err)
 	}
-	list := strings.Split(string(data), "\n")
-
-	r := regexp.MustCompile(`@@@([\s\S]*)":`)
-	for i := range list {
-		res := r.FindAllStringSubmatch(list[i], -1)
-		if len(res) > 0 {
-			str := r.ReplaceAllString(list[i], `":`)
-			comment := strings.TrimSpace(res[0][1])
-			if comment[0] == '*' {
-				comment = `【必需】` + comment
-			}
-			repeatTimes := commentLineOffset - len(str)
-			if repeatTimes < 1 {
-				repeatTimes = 1
-			}
-			str += strings.Repeat(` `, repeatTimes) + `// ` + comment
-			list[i] = str
-		}
-	}
-	return strings.Join(list, "\n")
+	return string(data)
 }
