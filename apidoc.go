@@ -188,7 +188,7 @@ func parseEntryDoc(r *router.R, basePath string) (content string) {
 }
 
 func makeJsonDoc(v interface{}) string {
-	data, err := jsondoc.MarshalIndent(v, ``, `  `)
+	data, err := jsondoc.MarshalIndent(v, false, ``, `  `)
 	if err != nil {
 		log.Panic(err)
 	}
