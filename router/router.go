@@ -86,70 +86,70 @@ func (r *R) Group(path string) *R {
 	return child
 }
 
-func (r *R) GetX(path string, handlerFunc goa.HandlerFunc) *R {
+func (r *R) GetX(path string, handlerFunc func(*goa.Context)) *R {
 	child := NewEntry(r.RouterGroup.Get(path, handlerFunc), path)
 	child.Info.Method = `GET`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
-func (r *R) Get(path string, handlerFunc goa.HandlerFunc) *R {
+func (r *R) Get(path string, handlerFunc func(*goa.Context)) *R {
 	child := NewEntry(r.RouterGroup.Get(path, handlerFunc), path)
 	child.Info.Method = `GET`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
-func (r *R) PostX(path string, handlerFunc goa.HandlerFunc) *R {
+func (r *R) PostX(path string, handlerFunc func(*goa.Context)) *R {
 	child := NewEntry(r.RouterGroup.Post(path, handlerFunc), path)
 	child.Info.Method = `POST`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
-func (r *R) Post(path string, handlerFunc goa.HandlerFunc) *R {
+func (r *R) Post(path string, handlerFunc func(*goa.Context)) *R {
 	child := NewEntry(r.RouterGroup.Post(path, handlerFunc), path)
 	child.Info.Method = `POST`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
-func (r *R) PutX(path string, handlerFunc goa.HandlerFunc) *R {
+func (r *R) PutX(path string, handlerFunc func(*goa.Context)) *R {
 	child := NewEntry(r.RouterGroup.Put(path, handlerFunc), path)
 	child.Info.Method = `PUT`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
-func (r *R) Put(path string, handlerFunc goa.HandlerFunc) *R {
+func (r *R) Put(path string, handlerFunc func(*goa.Context)) *R {
 	child := NewEntry(r.RouterGroup.Put(path, handlerFunc), path)
 	child.Info.Method = `PUT`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
-func (r *R) PatchX(path string, handlerFunc goa.HandlerFunc) *R {
+func (r *R) PatchX(path string, handlerFunc func(*goa.Context)) *R {
 	child := NewEntry(r.RouterGroup.Patch(path, handlerFunc), path)
 	child.Info.Method = `PATCH`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
-func (r *R) Patch(path string, handlerFunc goa.HandlerFunc) *R {
+func (r *R) Patch(path string, handlerFunc func(*goa.Context)) *R {
 	child := NewEntry(r.RouterGroup.Patch(path, handlerFunc), path)
 	child.Info.Method = `PATCH`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
-func (r *R) DeleteX(path string, handlerFunc goa.HandlerFunc) *R {
+func (r *R) DeleteX(path string, handlerFunc func(*goa.Context)) *R {
 	child := NewEntry(r.RouterGroup.Delete(path, handlerFunc), path)
 	child.Info.Method = `DELETE`
 	r.Nodes = append(r.Nodes, child)
 	return child
 }
 
-func (r *R) Delete(path string, handlerFunc goa.HandlerFunc) *R {
+func (r *R) Delete(path string, handlerFunc func(*goa.Context)) *R {
 	child := NewEntry(r.RouterGroup.Delete(path, handlerFunc), path)
 	child.Info.Method = `DELETE`
 	r.Nodes = append(r.Nodes, child)
